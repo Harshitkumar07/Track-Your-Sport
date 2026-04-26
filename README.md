@@ -1,10 +1,10 @@
-# MatchArena 🏏⚽🏐
+# Track Your Sport 🏏⚽🏐
 
-<img src="public/logo192.png" alt="MatchArena Logo" width="120" />
+<img src="public/logo192.png" alt="Track Your Sport Logo" width="120" />
 
-**MatchArena** is a production-ready, real-time multi-sport score-tracking and community platform. Track live scores, engage with sports communities, and stay updated with your favorite sports - Cricket, Football, and Kabaddi.
+**Track Your Sport** is a production-ready, real-time multi-sport score-tracking and community platform. Track live scores, engage with sports communities, and stay updated with your favorite sports - Cricket, Football, and Kabaddi.
 
-[![Build Status](https://github.com/Harshitkumar07/MatchArena/workflows/Basic%20Build%20Check/badge.svg)](https://github.com/Harshitkumar07/MatchArena/actions)
+[![Build Status](https://github.com/Harshitkumar07/Track Your Sport/workflows/Basic%20Build%20Check/badge.svg)](https://github.com/Harshitkumar07/Track Your Sport/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## 🚀 Features
@@ -49,8 +49,8 @@
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/Harshitkumar07/MatchArena.git
-cd MatchArena
+git clone https://github.com/Harshitkumar07/Track Your Sport.git
+cd Track Your Sport
 ```
 
 2. **Install dependencies**
@@ -153,7 +153,7 @@ npm run lint
 ## 📁 Project Structure
 
 ```
-matcharena/
+track-your-sport/
 ├── src/                          # React application source
 │   ├── components/               # Reusable UI components
 │   │   ├── cricket/             # Cricket-specific components
@@ -308,8 +308,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-For support, email support@matcharena.com or join our Discord server.
+For support, email support@track-your-sport.com or join our Discord server.
 
 ---
 
-**Built with ❤️ by the MatchArena Team**
+**Built with ❤️ by the Track Your Sport Team**

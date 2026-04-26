@@ -1,7 +1,7 @@
 {
-  "name": "matcharena-api",
+  "name": "track-your-sport-api",
   "version": "1.0.0",
-  "description": "MatchArena API backend for Vercel",
+  "description": "Track Your Sport API backend for Vercel",
   "main": "index.js",
   "dependencies": {
     "express": "^4.18.2",

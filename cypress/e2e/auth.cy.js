@@ -4,7 +4,7 @@ describe('Authentication Flow', () => {
   });
 
   it('should display home page for unauthenticated users', () => {
-    cy.contains('MatchArena').should('be.visible');
+    cy.contains('Track Your Sport').should('be.visible');
     cy.get('[data-testid="signin-button"]').should('be.visible');
   });
 

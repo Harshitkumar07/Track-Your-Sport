@@ -302,7 +302,7 @@ export const API_ENDPOINTS = {
 
 // App configuration
 export const APP_CONFIG = {
-  appName: 'MatchArena',
+  appName: 'Track Your Sport',
   appTagline: 'Real-time Sports Tracking & Community',
   appDescription: 'Track live scores and engage with sports communities',
   defaultSport: 'cricket',

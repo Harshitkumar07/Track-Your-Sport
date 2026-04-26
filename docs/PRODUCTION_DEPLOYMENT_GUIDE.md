@@ -1,7 +1,7 @@
-# 🚀 MatchArena Production Deployment Guide
+# 🚀 Track Your Sport Production Deployment Guide
 
 ## Overview
-This guide will help you deploy MatchArena to production with real live sports data from your Cricket API (cricketdata.org) and API-Football (20+ sports).
+This guide will help you deploy Track Your Sport to production with real live sports data from your Cricket API (cricketdata.org) and API-Football (20+ sports).
 
 ## 📋 Prerequisites Checklist
 
@@ -21,8 +21,8 @@ This guide will help you deploy MatchArena to production with real live sports d
 firebase login
 
 # Create new project (or use existing)
-firebase projects:create matcharena-prod
-firebase use matcharena-prod
+firebase projects:create track-your-sport-prod
+firebase use track-your-sport-prod
 ```
 
 ### 1.2 Enable Required Services
@@ -48,7 +48,7 @@ In Firebase Console (https://console.firebase.google.com):
 ### 2.1 Configure API Keys in Firebase Functions
 ```bash
 # Navigate to your project directory
-cd path/to/MatchArena
+cd path/to/Track Your Sport
 
 # Set Cricket API key (from cricketdata.org)
 firebase functions:config:set cricket.api_key="YOUR_CRICKET_API_KEY"
@@ -322,7 +322,7 @@ firebase database:get / > backup-$(date +%Y%m%d).json
 
 ## 🎉 Success!
 
-Your MatchArena is now live with:
+Your Track Your Sport is now live with:
 - ✅ Real cricket live scores from cricketdata.org
 - ✅ 20+ sports from API-Football
 - ✅ Secure Firebase backend

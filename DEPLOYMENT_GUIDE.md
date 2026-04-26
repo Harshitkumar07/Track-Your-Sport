@@ -1,4 +1,4 @@
-# MatchArena Deployment Guide
+# Track Your Sport Deployment Guide
 
 ## 🚀 Recent Changes
 
@@ -83,13 +83,13 @@ After deployment, test your production URLs:
 
 **Vercel API Test:**
 ```
-https://matcharena-116q0rnj1-harshit-kumars-projects-27b7606f.vercel.app/api/cricket-live
-https://matcharena-116q0rnj1-harshit-kumars-projects-27b7606f.vercel.app/api/football-live
+https://track-your-sport-116q0rnj1-harshit-kumars-projects-27b7606f.vercel.app/api/cricket-live
+https://track-your-sport-116q0rnj1-harshit-kumars-projects-27b7606f.vercel.app/api/football-live
 ```
 
 **Firebase Hosting Test:**
 ```
-https://matcharena-app-e3d24.web.app
+https://track-your-sport-c09b4.web.app
 ```
 
 ---

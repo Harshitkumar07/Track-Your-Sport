@@ -6,7 +6,7 @@
 import { BaseSportAdapter, AdapterError, ERROR_CODES } from '../adapters/base';
 
 // Vercel API base URL - always use production Vercel endpoint
-const FUNCTIONS_BASE = 'https://matcharena-116q0rnj1-harshit-kumars-projects-27b7606f.vercel.app/api';
+const FUNCTIONS_BASE = 'https://track-your-sport-116q0rnj1-harshit-kumars-projects-27b7606f.vercel.app/api';
 
 class CricketAPIService extends BaseSportAdapter {
   constructor() {

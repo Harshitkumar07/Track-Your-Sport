@@ -256,7 +256,7 @@ const SportsDashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                MatchArena Sports Center
+                Track Your Sport Sports Center
               </h1>
               <p className="text-gray-600 dark:text-gray-300 mt-1">
                 Live scores and updates from across Asia's premier sports leagues

@@ -8,7 +8,7 @@ const logger = winston.createLogger({
     winston.format.errors({ stack: true }),
     winston.format.json()
   ),
-  defaultMeta: { service: 'matcharena-functions' },
+  defaultMeta: { service: 'track-your-sport-functions' },
   transports: [
     // Console transport for development
     new winston.transports.Console({

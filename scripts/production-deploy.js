@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Production Deployment Script for MatchArena Multi-Sport Platform
+ * Production Deployment Script for Track Your Sport Multi-Sport Platform
  * Handles environment setup, testing, building, and deployment
  */
 
@@ -24,7 +24,7 @@ class ProductionDeployment {
       verbose: process.argv.includes('--verbose')
     };
 
-    console.log('🚀 MatchArena Production Deployment Started');
+    console.log('🚀 Track Your Sport Production Deployment Started');
     console.log('📁 Project Root:', this.projectRoot);
     console.log('⚙️  Configuration:', JSON.stringify(this.config, null, 2));
   }
@@ -392,7 +392,7 @@ class ProductionDeployment {
 
       console.log('\n🎉 Deployment Completed Successfully!');
       console.log(`⏱️  Total time: ${duration}s`);
-      console.log('🌐 Your MatchArena multi-sport platform is now live!');
+      console.log('🌐 Your Track Your Sport multi-sport platform is now live!');
 
     } catch (error) {
       console.error('\n💥 Deployment Failed!');
@@ -420,7 +420,7 @@ if (require.main === module) {
   // Handle deployment command
   if (process.argv.includes('--help') || process.argv.includes('-h')) {
     console.log(`
-MatchArena Production Deployment Script
+Track Your Sport Production Deployment Script
 
 Usage: node scripts/production-deploy.js [options]
 

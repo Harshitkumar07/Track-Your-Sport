@@ -11,7 +11,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['https://matcharena-app-e3d24.web.app', 'http://localhost:3000'],
+  origin: ['https://track-your-sport-c09b4.web.app', 'http://localhost:3000'],
   credentials: true
 }));
 app.use(express.json());

@@ -1,4 +1,4 @@
-# Deployment Guide for MatchArena
+# Deployment Guide for Track Your Sport
 
 ## Table of Contents
 - [Prerequisites](#prerequisites)
@@ -26,8 +26,8 @@
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/your-org/matcharena.git
-cd matcharena
+git clone https://github.com/your-org/track-your-sport.git
+cd track-your-sport
 ```
 
 ### 2. Install Dependencies
@@ -337,9 +337,9 @@ firebase database:set / backup.json
 ## Support
 
 For issues and questions:
-- GitHub Issues: [github.com/your-org/matcharena/issues]
-- Email: support@matcharena.com
-- Documentation: [docs.matcharena.com]
+- GitHub Issues: [github.com/your-org/track-your-sport/issues]
+- Email: support@track-your-sport.com
+- Documentation: [docs.track-your-sport.com]
 
 ## License
 

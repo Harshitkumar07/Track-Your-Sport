@@ -15,8 +15,8 @@ const app = express();
 app.use(cors({
   origin: [
     'http://localhost:3000',
-    'https://matcharena-app-e3d24.web.app',
-    'https://matcharena-app-e3d24.firebaseapp.com'
+    'https://track-your-sport-c09b4.web.app',
+    'https://track-your-sport-c09b4.firebaseapp.com'
   ]
 }));
 

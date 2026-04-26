@@ -7,7 +7,7 @@
     "indexes": "config/firestore.indexes.json"
   },
   "hosting": {
-    "site": "matcharena-app-e3d24",
+    "site": "track-your-sport-c09b4",
     "public": "build",
     "ignore": [
       "firebase.json",

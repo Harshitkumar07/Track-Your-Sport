@@ -1,9 +1,9 @@
 {
-  "name": "matcharena",
+  "name": "track-your-sport",
   "version": "1.0.0",
   "private": true,
-  "description": "MatchArena - Real-time multi-sport score-tracking and community platform",
-  "author": "MatchArena Team",
+  "description": "Track Your Sport - Real-time multi-sport score-tracking and community platform",
+  "author": "Track Your Sport Team",
   "license": "MIT",
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

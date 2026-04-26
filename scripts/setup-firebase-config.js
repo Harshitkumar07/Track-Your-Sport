@@ -9,7 +9,7 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-console.log('🔥 MatchArena Firebase Configuration Setup');
+console.log('🔥 Track Your Sport Firebase Configuration Setup');
 console.log('==========================================\n');
 
 // Read environment variables from .env files
@@ -66,11 +66,11 @@ const commands = [
   },
   {
     name: 'Admin Emails',
-    command: 'firebase functions:config:set admin.allowed_emails="admin@matcharena.com"'
+    command: 'firebase functions:config:set admin.allowed_emails="admin@track-your-sport.com"'
   },
   {
     name: 'Security Origins',
-    command: 'firebase functions:config:set security.allowed_origins="http://localhost:3000,https://matcharena-app-e3d24.web.app,https://matcharena-app-e3d24.firebaseapp.com"'
+    command: 'firebase functions:config:set security.allowed_origins="http://localhost:3000,https://track-your-sport-c09b4.web.app,https://track-your-sport-c09b4.firebaseapp.com"'
   },
   {
     name: 'App Environment',

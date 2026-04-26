@@ -15,9 +15,9 @@ module.exports = defineConfig({
     responseTimeout: 10000,
     env: {
       FIREBASE_API_KEY: process.env.REACT_APP_FIREBASE_API_KEY,
-      TEST_EMAIL: 'test@matcharena.com',
+      TEST_EMAIL: 'test@track-your-sport.com',
       TEST_PASSWORD: 'testPassword123',
-      ADMIN_EMAIL: 'admin@matcharena.com',
+      ADMIN_EMAIL: 'admin@track-your-sport.com',
       ADMIN_PASSWORD: 'adminPassword123',
     },
     setupNodeEvents(on, config) {

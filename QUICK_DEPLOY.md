@@ -32,15 +32,15 @@ npm start
 ## 🔗 Important URLs
 
 ### Production
-- **Frontend**: https://matcharena-app-e3d24.web.app
-- **API**: https://matcharena-116q0rnj1-harshit-kumars-projects-27b7606f.vercel.app/api
+- **Frontend**: https://track-your-sport-c09b4.web.app
+- **API**: https://track-your-sport-116q0rnj1-harshit-kumars-projects-27b7606f.vercel.app/api
 
 ### Test Endpoints
 ```
-https://matcharena-116q0rnj1-harshit-kumars-projects-27b7606f.vercel.app/api/cricket-live
-https://matcharena-116q0rnj1-harshit-kumars-projects-27b7606f.vercel.app/api/football-live
-https://matcharena-116q0rnj1-harshit-kumars-projects-27b7606f.vercel.app/api/cricket-series
-https://matcharena-116q0rnj1-harshit-kumars-projects-27b7606f.vercel.app/api/football-upcoming
+https://track-your-sport-116q0rnj1-harshit-kumars-projects-27b7606f.vercel.app/api/cricket-live
+https://track-your-sport-116q0rnj1-harshit-kumars-projects-27b7606f.vercel.app/api/football-live
+https://track-your-sport-116q0rnj1-harshit-kumars-projects-27b7606f.vercel.app/api/cricket-series
+https://track-your-sport-116q0rnj1-harshit-kumars-projects-27b7606f.vercel.app/api/football-upcoming
 ```
 
 ---

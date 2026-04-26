@@ -67,7 +67,7 @@ app.get('/health', (req, res) => {
     success: true,
     status: 'healthy',
     timestamp: Date.now(),
-    message: 'MatchArena API is operational',
+    message: 'Track Your Sport API is operational',
     version: '2.0.0-real-apis',
     environment: process.env.NODE_ENV || 'development'
   });
@@ -209,9 +209,9 @@ exports.healthCheck = functions.https.onRequest((req, res) => {
     status: 'healthy',
     timestamp: Date.now(),
     version: '2.0.0-real-apis',
-    message: 'MatchArena Functions are running with real APIs!',
+    message: 'Track Your Sport Functions are running with real APIs!',
     uptime: process.uptime()
   });
 });
 
-functions.logger.info('🚀 MatchArena Functions loaded successfully with real API integration!');
+functions.logger.info('🚀 Track Your Sport Functions loaded successfully with real API integration!');

@@ -63,7 +63,7 @@ describe('SportsDashboard Component', () => {
   test('renders main dashboard with all sports', () => {
     render(<SportsDashboard />);
     
-    expect(screen.getByText('MatchArena Sports Center')).toBeInTheDocument();
+    expect(screen.getByText('Track Your Sport Sports Center')).toBeInTheDocument();
     expect(screen.getByText('Cricket')).toBeInTheDocument();
     expect(screen.getByText('Football')).toBeInTheDocument();
     expect(screen.getByText('Basketball')).toBeInTheDocument();

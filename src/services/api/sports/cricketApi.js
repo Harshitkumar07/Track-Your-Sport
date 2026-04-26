@@ -5,17 +5,15 @@
 
 import { BaseSportAdapter, AdapterError, ERROR_CODES } from '../adapters/base';
 
-// Firebase Functions API base URL
-const FUNCTIONS_BASE = process.env.NODE_ENV === 'development' 
-  ? 'http://localhost:5001/matcharena-app-e3d24/us-central1/api'
-  : '/api';
+// Vercel API base URL - always use production Vercel endpoint
+const FUNCTIONS_BASE = 'https://matcharena-116q0rnj1-harshit-kumars-projects-27b7606f.vercel.app/api';
 
 class CricketAPIService extends BaseSportAdapter {
   constructor() {
     super('cricket');
     this.functionsBase = FUNCTIONS_BASE;
     this.cache = new Map();
-    this.cacheTimeout = 60000; // 1 minute cache
+    this.cacheTimeout = 30000; // 30 second cache - reduced for testing
   }
 
   async fetchFromFunction(endpoint, cacheKey, options = {}) {
@@ -29,7 +27,7 @@ class CricketAPIService extends BaseSportAdapter {
 
     try {
       const url = `${this.functionsBase}${endpoint}`;
-      // console.log('Fetching from Firebase Function:', url);
+      console.log('Fetching from Vercel API:', url);
       
       const response = await fetch(url, {
         method: 'GET',
@@ -44,6 +42,7 @@ class CricketAPIService extends BaseSportAdapter {
       }
 
       const result = await response.json();
+      console.log('API Response:', result);
       
       // Handle both API format and direct JSON
       let data;
@@ -61,6 +60,8 @@ class CricketAPIService extends BaseSportAdapter {
         // Direct JSON data
         data = result;
       }
+      
+      console.log('Processed data:', data);
       
       // Cache the response
       this.cache.set(cacheKey, {
@@ -88,7 +89,7 @@ class CricketAPIService extends BaseSportAdapter {
 
   async getLiveMatches() {
     try {
-      return await this.fetchFromFunction('/cricket/live', 'cricket_live_matches');
+      return await this.fetchFromFunction('/cricket-live', 'cricket_live_matches');
     } catch (error) {
       console.error('Error fetching live cricket matches:', error);
       return [];
@@ -97,7 +98,7 @@ class CricketAPIService extends BaseSportAdapter {
 
   async getUpcomingMatches(_days = 7) {
     try {
-      return await this.fetchFromFunction('/cricket/upcoming', 'cricket_upcoming_matches');
+      return await this.fetchFromFunction('/cricket-upcoming', 'cricket_upcoming_matches');
     } catch (error) {
       console.error('Error fetching upcoming cricket matches:', error);
       return [];
@@ -106,7 +107,7 @@ class CricketAPIService extends BaseSportAdapter {
 
   async getRecentMatches(_days = 7) {
     try {
-      return await this.fetchFromFunction('/cricket/recent', 'cricket_recent_matches');
+      return await this.fetchFromFunction('/cricket-recent', 'cricket_recent_matches');
     } catch (error) {
       console.error('Error fetching recent cricket matches:', error);
       return [];
@@ -127,7 +128,7 @@ class CricketAPIService extends BaseSportAdapter {
 
   async getSeries() {
     try {
-      return await this.fetchFromFunction('/cricket/series', 'cricket_series');
+      return await this.fetchFromFunction('/cricket-series', 'cricket_series');
     } catch (error) {
       console.error('Error fetching cricket series:', error);
       return [];

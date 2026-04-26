@@ -225,9 +225,9 @@ matcharena/
 5. Update database schema if needed
 
 ### Supported Sports APIs
-- **Cricket**: CricAPI
-- **Football**: (Configure your provider)
-- **Kabaddi**: (Configure your provider)
+- **Cricket**: CricAPI (https://cricapi.com)
+- **Football**: API-SPORTS (https://www.api-football.com)
+- **Other Sports**: API-SPORTS supports 20+ sports including Basketball, Tennis, Hockey, Rugby, etc.
 
 ## 🤝 Contributing
 

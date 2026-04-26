@@ -1,6 +1,6 @@
 const express = require('express');
-const SportsService = require('../services/sportsService');
-const { cacheMiddleware } = require('../utils/cache');
+const SportsService = require('../_services/sportsService');
+const { cacheMiddleware } = require('../_utils/cache');
 
 const router = express.Router();
 const sportsService = new SportsService();

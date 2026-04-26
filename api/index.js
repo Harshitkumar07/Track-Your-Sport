@@ -3,9 +3,9 @@ const express = require('express');
 const cors = require('cors');
 
 // Import routes
-const cricketRoutes = require('./routes/cricket');
-const sportsRoutes = require('./routes/sports');
-const healthRoutes = require('./routes/health');
+const cricketRoutes = require('./_routes/cricket');
+const sportsRoutes = require('./_routes/sports');
+const healthRoutes = require('./_routes/health');
 
 const app = express();
 

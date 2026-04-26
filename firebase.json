@@ -7,6 +7,7 @@
     "indexes": "config/firestore.indexes.json"
   },
   "hosting": {
+    "site": "matcharena-app-e3d24",
     "public": "build",
     "ignore": [
       "firebase.json",

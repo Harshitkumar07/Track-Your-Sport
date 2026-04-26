@@ -1,6 +1,6 @@
 const express = require('express');
-const CricketService = require('../services/cricketService');
-const { cacheMiddleware } = require('../utils/cache');
+const CricketService = require('../_services/cricketService');
+const { cacheMiddleware } = require('../_utils/cache');
 
 const router = express.Router();
 const cricketService = new CricketService();

@@ -20,19 +20,25 @@ const MatchList = () => {
 
   // Validate sport parameter
   const sportConfig = SPORTS[sport];
-  if (!sportConfig) {
-    navigate('/explore');
-    return null;
-  }
+  
+  useEffect(() => {
+    if (!sportConfig) {
+      navigate('/explore');
+    }
+  }, [sportConfig, navigate]);
 
   // Fetch matches for the sport
   const { data: matches, isLoading, error } = useRealtimeDatabase(
-    `matches/${sport}`,
+    sportConfig ? `matches/${sport}` : null,
     {
       orderBy: 'startTime',
       limitToLast: 50,
     }
   );
+  
+  if (!sportConfig) {
+    return null;
+  }
 
   // Filter matches based on status
   const filteredMatches = matches?.filter(match => {
@@ -63,7 +69,7 @@ const MatchList = () => {
     return 0;
   });
 
-  const handleFollowMatch = async (matchId) => {
+  const handleFollowMatch = async (_matchId) => {
     if (!user) {
       toast.error('Please sign in to follow matches');
       navigate('/auth');

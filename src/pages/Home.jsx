@@ -4,35 +4,56 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { APP_CONFIG, SUPPORTED_SPORTS } from '../config/routes';
-import LiveTicker from '../components/LiveTicker';
 import MatchCard from '../components/MatchCard';
 import { fetchCricketData } from '../services/api/sports/cricketApi';
+import { fetchFootballData } from '../services/api/sports/footballApi';
 import toast from 'react-hot-toast';
 
 const Home = () => {
   const { isAuthenticated } = useAuth();
   const { isDark } = useTheme();
   const [cricketData, setCricketData] = useState({ live: [], upcoming: [], recent: [] });
+  const [footballData, setFootballData] = useState({ live: [], upcoming: [], recent: [] });
+  const [allLiveMatches, setAllLiveMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    const loadCricketData = async () => {
+    const loadAllSportsData = async () => {
       try {
         setLoading(true);
-        const data = await fetchCricketData();
-        setCricketData(data);
+        
+        // Fetch cricket and football data in parallel
+        const [cricket, football] = await Promise.all([
+          fetchCricketData(),
+          fetchFootballData()
+        ]);
+        
+        setCricketData(cricket);
+        setFootballData(football);
+        
+        // Combine all live matches
+        const combined = [
+          ...cricket.live.map(m => ({ ...m, sport: 'cricket', sportIcon: '🏏' })),
+          ...football.live.map(m => ({ ...m, sport: 'football', sportIcon: '⚽' }))
+        ];
+        
+        setAllLiveMatches(combined);
+        
+        if (combined.length > 0) {
+          toast.success(`${combined.length} live matches available!`);
+        }
       } catch (error) {
-        console.error('Error loading cricket data:', error);
+        console.error('Error loading sports data:', error);
         toast.error('Failed to load match data');
       } finally {
         setLoading(false);
       }
     };
     
-    loadCricketData();
+    loadAllSportsData();
     
     // Refresh data every minute
-    const interval = setInterval(loadCricketData, 60000);
+    const interval = setInterval(loadAllSportsData, 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -76,18 +97,35 @@ const Home = () => {
           <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-60 h-60 bg-white opacity-10 rounded-full"></div>
         </section>
 
-        {/* Live Matches Ticker */}
+        {/* Live Matches - All Sports */}
         <section>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">Live Matches</h2>
+            <h2 className="text-2xl font-bold">🔴 Live Matches - All Sports</h2>
             <Link 
-              to="/sport/cricket" 
+              to="/explore" 
               className="text-blue-500 hover:text-blue-600 text-sm font-medium"
             >
-              View All Matches →
+              View All Sports →
             </Link>
           </div>
-          <LiveTicker sport="cricket" maxItems={5} />
+          
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            </div>
+          ) : allLiveMatches.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {allLiveMatches.slice(0, 6).map((match) => (
+                <MatchCard key={`${match.sport}-${match.id}`} match={match} sport={match.sport} />
+              ))}
+            </div>
+          ) : (
+            <div className={`${isDark ? 'bg-gray-800' : 'bg-gray-100'} rounded-xl p-8 text-center`}>
+              <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                No live matches at the moment. Check back soon!
+              </p>
+            </div>
+          )}
         </section>
 
         {/* Sports Grid */}
@@ -119,57 +157,77 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Live and Upcoming Matches */}
+        {/* Featured Matches by Sport */}
         <section>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">Cricket Matches</h2>
-            <Link 
-              to="/sport/cricket" 
-              className="text-blue-500 hover:text-blue-600 text-sm font-medium"
-            >
-              View All Matches →
-            </Link>
-          </div>
+          <h2 className="text-2xl font-bold mb-6">Featured Matches</h2>
           
           {loading ? (
             <div className="flex justify-center items-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
             </div>
           ) : (
-            <div className="space-y-6">
-              {/* Live Matches */}
-              {cricketData.live.length > 0 && (
+            <div className="space-y-8">
+              {/* Cricket Section */}
+              {(cricketData.live.length > 0 || cricketData.upcoming.length > 0) && (
                 <div>
-                  <h3 className="text-lg font-semibold mb-3 text-red-500">🔴 Live Now</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-semibold flex items-center">
+                      <span className="text-2xl mr-2">🏏</span>
+                      Cricket
+                    </h3>
+                    <Link 
+                      to="/sport/cricket" 
+                      className="text-blue-500 hover:text-blue-600 text-sm font-medium"
+                    >
+                      View All →
+                    </Link>
+                  </div>
+                  
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {cricketData.live.map((match) => (
-                      <MatchCard key={match.id} match={match} sport="cricket" />
+                    {cricketData.live.slice(0, 2).map((match) => (
+                      <MatchCard key={match.id} match={{ ...match, sport: 'cricket' }} sport="cricket" />
+                    ))}
+                    {cricketData.upcoming.slice(0, 2).map((match) => (
+                      <MatchCard key={match.id} match={{ ...match, sport: 'cricket' }} sport="cricket" />
                     ))}
                   </div>
                 </div>
               )}
               
-              {/* Upcoming Matches */}
-              {cricketData.upcoming.length > 0 && (
+              {/* Football Section */}
+              {(footballData.live.length > 0 || footballData.upcoming.length > 0) && (
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">Upcoming Matches</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-semibold flex items-center">
+                      <span className="text-2xl mr-2">⚽</span>
+                      Football
+                    </h3>
+                    <Link 
+                      to="/sport/football" 
+                      className="text-blue-500 hover:text-blue-600 text-sm font-medium"
+                    >
+                      View All →
+                    </Link>
+                  </div>
+                  
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {cricketData.upcoming.slice(0, 4).map((match) => (
-                      <MatchCard key={match.id} match={match} sport="cricket" />
+                    {footballData.live.slice(0, 2).map((match) => (
+                      <MatchCard key={match.id} match={{ ...match, sport: 'football' }} sport="football" />
+                    ))}
+                    {footballData.upcoming.slice(0, 2).map((match) => (
+                      <MatchCard key={match.id} match={{ ...match, sport: 'football' }} sport="football" />
                     ))}
                   </div>
                 </div>
               )}
               
-              {/* Recent Matches */}
-              {cricketData.recent.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-3">Recent Results</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {cricketData.recent.slice(0, 2).map((match) => (
-                      <MatchCard key={match.id} match={match} sport="cricket" />
-                    ))}
-                  </div>
+              {/* No matches message */}
+              {cricketData.live.length === 0 && cricketData.upcoming.length === 0 && 
+               footballData.live.length === 0 && footballData.upcoming.length === 0 && (
+                <div className={`${isDark ? 'bg-gray-800' : 'bg-gray-100'} rounded-xl p-8 text-center`}>
+                  <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    No matches available at the moment. Check back soon!
+                  </p>
                 </div>
               )}
             </div>

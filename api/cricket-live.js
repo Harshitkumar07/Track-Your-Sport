@@ -1,0 +1,51 @@
+// Vercel Serverless Function for Cricket Live Matches
+const fetch = require('node-fetch');
+
+export default async function handler(req, res) {
+  // Enable CORS - comprehensive headers
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    const apiKey = process.env.CRICAPI_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: 'API key not configured' });
+    }
+
+    console.log('Fetching live cricket matches...');
+    const response = await fetch(`https://api.cricapi.com/v1/currentMatches?apikey=${apiKey}&offset=0`);
+    
+    if (!response.ok) {
+      throw new Error(`CricAPI request failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const matches = Array.isArray(data) ? data : data.data || [];
+    const liveMatches = matches.filter(match => match.matchStarted || match.status === 'Live');
+
+    res.status(200).json({
+      success: true,
+      data: liveMatches,
+      count: liveMatches.length,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error fetching live cricket matches:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch live cricket matches',
+      message: error.message
+    });
+  }
+}

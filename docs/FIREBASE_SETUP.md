@@ -1,6 +1,6 @@
-# Firebase Setup Guide for MatchArena
+# Firebase Setup Guide for Track Your Sport
 
-This guide will help you set up Firebase for the MatchArena application.
+This guide will help you set up Firebase for the Track Your Sport application.
 
 ## Prerequisites
 
@@ -12,7 +12,7 @@ This guide will help you set up Firebase for the MatchArena application.
 
 1. Go to [Firebase Console](https://console.firebase.google.com/)
 2. Click "Create a project" or "Add project"
-3. Enter project name: `matcharena` (or your preferred name)
+3. Enter project name: `track-your-sport` (or your preferred name)
 4. Disable Google Analytics for now (you can enable it later)
 5. Click "Create project"
 
@@ -44,7 +44,7 @@ In the Firebase Console for your project:
 1. In Firebase Console, click the gear icon ⚙️ → "Project settings"
 2. Scroll down to "Your apps" section
 3. Click the "</>" (Web) icon to add a web app
-4. Register app with nickname "MatchArena Web"
+4. Register app with nickname "Track Your Sport Web"
 5. Copy the Firebase configuration object
 
 ## Step 4: Configure Environment Variables
@@ -144,7 +144,7 @@ For Cloud Functions to work with external APIs, set configuration:
 firebase functions:config:set cric.api_key="YOUR_CRICAPI_KEY"
 
 # Set admin emails (comma-separated)
-firebase functions:config:set admin.allowed_emails="admin@matcharena.com,your-email@example.com"
+firebase functions:config:set admin.allowed_emails="admin@track-your-sport.com,your-email@example.com"
 
 # Optional: Discord webhook for notifications
 firebase functions:config:set discord.webhook="YOUR_DISCORD_WEBHOOK_URL"
@@ -180,8 +180,8 @@ npm start
 2. The app should load without errors
 3. Check Firebase Emulator UI at http://localhost:4000
 4. Try creating an account with the test credentials:
-   - Admin: admin@matcharena.com / admin123456
-   - User: user1@matcharena.com / user123456
+   - Admin: admin@track-your-sport.com / admin123456
+   - User: user1@track-your-sport.com / user123456
 
 ## Troubleshooting
 

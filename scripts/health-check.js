@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Health Check Script for MatchArena Multi-Sport Platform
+ * Health Check Script for Track Your Sport Multi-Sport Platform
  * Monitors API endpoints, Firebase services, and application health
  */
 
@@ -19,7 +19,7 @@ class HealthChecker {
       errors: []
     };
 
-    console.log('🏥 MatchArena Health Check Started');
+    console.log('🏥 Track Your Sport Health Check Started');
   }
 
   // Generic HTTP health check
@@ -36,7 +36,7 @@ class HealthChecker {
         method: 'GET',
         timeout: timeout,
         headers: {
-          'User-Agent': 'MatchArena-HealthCheck/1.0'
+          'User-Agent': 'Track Your Sport-HealthCheck/1.0'
         }
       };
 
@@ -130,7 +130,7 @@ class HealthChecker {
   async checkFirebaseServices() {
     console.log('\n🔥 Checking Firebase Services...');
 
-    const projectId = process.env.FIREBASE_PROJECT_ID || process.env.REACT_APP_FIREBASE_PROJECT_ID || 'matcharena-app-e3d24';
+    const projectId = process.env.FIREBASE_PROJECT_ID || process.env.REACT_APP_FIREBASE_PROJECT_ID || 'track-your-sport-c09b4';
     
     if (!projectId) {
       console.log('⚠️  Firebase project ID not configured');
@@ -393,7 +393,7 @@ class HealthChecker {
 if (require.main === module) {
   if (process.argv.includes('--help') || process.argv.includes('-h')) {
     console.log(`
-MatchArena Health Check Script
+Track Your Sport Health Check Script
 
 Usage: node scripts/health-check.js [options]
 

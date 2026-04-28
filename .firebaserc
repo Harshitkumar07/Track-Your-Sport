@@ -1,30 +1,5 @@
 {
   "projects": {
-    "default": "matcharena-app-e3d24",
-    "staging": "matcharena-app-e3d24",
-    "production": "matcharena-app-e3d24"
-  },
-  "targets": {
-    "matcharena-dev": {
-      "hosting": {
-        "app": [
-          "matcharena-dev"
-        ]
-      }
-    },
-    "matcharena-staging": {
-      "hosting": {
-        "app": [
-          "matcharena-staging"
-        ]
-      }
-    },
-    "matcharena-prod": {
-      "hosting": {
-        "app": [
-          "matcharena-prod"
-        ]
-      }
-    }
+    "default": "track-your-sport-c09b4"
   }
 }

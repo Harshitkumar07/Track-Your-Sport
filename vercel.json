@@ -9,6 +9,11 @@
     "CRICAPI_KEY": "bdc46755-7e68-459e-a2ab-b79ad1d50554",
     "APISPORTS_KEY": "d11dca33082525388b3b094a8f4b31ae"
   },
+  "build": {
+    "env": {
+      "CI": "false"
+    }
+  },
   "headers": [
     {
       "source": "/api/(.*)",

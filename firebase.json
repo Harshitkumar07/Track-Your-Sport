@@ -7,6 +7,7 @@
     "indexes": "config/firestore.indexes.json"
   },
   "hosting": {
+    "site": "track-your-sport-c09b4",
     "public": "build",
     "ignore": [
       "firebase.json",

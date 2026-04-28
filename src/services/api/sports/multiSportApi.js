@@ -7,7 +7,7 @@ import { BaseSportAdapter, MATCH_STATUS, AdapterError, ERROR_CODES } from '../ad
 
 // Firebase Functions endpoint
 const FUNCTIONS_BASE = process.env.NODE_ENV === 'development' 
-  ? 'http://localhost:5001/matcharena-app-e3d24/us-central1/api'
+  ? 'http://localhost:5001/track-your-sport-c09b4/us-central1/api'
   : '/api';
 
 class MultiSportAPIService extends BaseSportAdapter {

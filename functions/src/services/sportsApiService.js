@@ -71,7 +71,7 @@ class SportsAPIService {
           offset: 0
         },
         headers: {
-          'User-Agent': 'MatchArena/1.0'
+          'User-Agent': 'Track Your Sport/1.0'
         }
       });
 

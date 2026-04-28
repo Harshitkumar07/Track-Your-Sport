@@ -1,6 +1,6 @@
-# MatchArena Documentation
+# Track Your Sport Documentation
 
-Welcome to the MatchArena documentation! This directory contains comprehensive guides and documentation for the MatchArena sports platform.
+Welcome to the Track Your Sport documentation! This directory contains comprehensive guides and documentation for the Track Your Sport sports platform.
 
 ## 📋 Documentation Index
 
@@ -19,8 +19,8 @@ Welcome to the MatchArena documentation! This directory contains comprehensive g
 1. **Initial Setup**
    ```bash
    # Clone and install dependencies
-   git clone https://github.com/Harshitkumar07/MatchArena.git
-   cd MatchArena
+   git clone https://github.com/Harshitkumar07/Track Your Sport.git
+   cd Track Your Sport
    npm install
    cd functions && npm install && cd ..
    ```

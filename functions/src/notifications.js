@@ -151,7 +151,7 @@ async function sendWelcomeEmail(user) {
     // In production, this would use an email service like SendGrid
     const emailData = {
       to: user.email,
-      subject: 'Welcome to MatchArena!',
+      subject: 'Welcome to Track Your Sport!',
       template: 'welcome',
       data: {
         name: user.displayName || user.email.split('@')[0],
@@ -165,7 +165,7 @@ async function sendWelcomeEmail(user) {
     // Also create an in-app notification
     const notification = {
       type: 'system',
-      title: 'Welcome to MatchArena!',
+      title: 'Welcome to Track Your Sport!',
       body: 'Thank you for joining. Explore live matches, join the community, and never miss a moment!',
       priority: 'normal',
       createdAt: admin.database.ServerValue.TIMESTAMP,

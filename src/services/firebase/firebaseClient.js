@@ -8,10 +8,10 @@ import { getPerformance } from 'firebase/performance';
 // Firebase configuration from environment variables
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "AIzaSyAHih9ia5LOwbTp8vlBn5dUQKeTsaPFhzI",
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || "matcharena-app-e3d24.firebaseapp.com",
-  databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL || "https://matcharena-app-e3d24-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || "matcharena-app-e3d24",
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || "matcharena-app-e3d24.firebasestorage.app",
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || "track-your-sport-c09b4.firebaseapp.com",
+  databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL || "https://track-your-sport-c09b4-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || "track-your-sport-c09b4",
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || "track-your-sport-c09b4.firebasestorage.app",
   messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || "678280737385",
   appId: process.env.REACT_APP_FIREBASE_APP_ID || "1:678280737385:web:201a80588904e517aea8f8",
   measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID || "G-BYTZ8KDE5W"

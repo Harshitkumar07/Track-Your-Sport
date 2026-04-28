@@ -283,7 +283,7 @@ export const useScoreNotifications = (options = {}) => {
 
         // Show browser notification if supported and enabled
         if (enableVisual && 'Notification' in window && Notification.permission === 'granted') {
-          new Notification(`MatchArena - ${latestUpdate.sport}`, {
+          new Notification(`Track Your Sport - ${latestUpdate.sport}`, {
             body: `Score updated in live match`,
             icon: '/logo192.png',
             tag: latestUpdate.matchId

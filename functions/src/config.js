@@ -29,8 +29,8 @@ const getConfig = () => {
         allowedOrigins: [
           'http://localhost:3000',
           'http://localhost:5000',
-          'https://matcharena-app-e3d24.web.app',
-          'https://matcharena-app-e3d24.firebaseapp.com'
+          'https://track-your-sport-c09b4.web.app',
+          'https://track-your-sport-c09b4.firebaseapp.com'
         ]
       }
     };
@@ -60,8 +60,8 @@ const getConfig = () => {
         allowedOrigins: [
           'http://localhost:3000',
           'http://localhost:5000',
-          'https://matcharena-app-e3d24.web.app',
-          'https://matcharena-app-e3d24.firebaseapp.com'
+          'https://track-your-sport-c09b4.web.app',
+          'https://track-your-sport-c09b4.firebaseapp.com'
         ]
       }
     };

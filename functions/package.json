@@ -1,6 +1,6 @@
 {
-  "name": "matcharena-functions",
-  "description": "Cloud Functions for MatchArena",
+  "name": "track-your-sport-functions",
+  "description": "Cloud Functions for Track Your Sport",
   "version": "1.0.0",
   "scripts": {
     "lint": "eslint .",

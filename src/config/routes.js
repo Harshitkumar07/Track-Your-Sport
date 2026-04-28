@@ -12,6 +12,9 @@ const ProfilePage = lazy(() => import('../pages/Profile'));
 const AdminPage = lazy(() => import('../pages/Admin'));
 const AuthPage = lazy(() => import('../pages/Auth'));
 const NotFoundPage = lazy(() => import('../pages/NotFound'));
+const PrivacyPage = lazy(() => import('../pages/Privacy'));
+const TermsPage = lazy(() => import('../pages/Terms'));
+const CookiesPage = lazy(() => import('../pages/Cookies'));
 
 // Route configuration
 export const routes = [
@@ -93,6 +96,27 @@ export const routes = [
     showInNav: false
   },
   {
+    path: '/privacy',
+    element: PrivacyPage,
+    title: 'Privacy Policy',
+    isPublic: true,
+    showInNav: false
+  },
+  {
+    path: '/terms',
+    element: TermsPage,
+    title: 'Terms of Service',
+    isPublic: true,
+    showInNav: false
+  },
+  {
+    path: '/cookies',
+    element: CookiesPage,
+    title: 'Cookie Policy',
+    isPublic: true,
+    showInNav: false
+  },
+  {
     path: '*',
     element: NotFoundPage,
     title: '404 Not Found',
@@ -101,177 +125,179 @@ export const routes = [
   }
 ];
 
-// Sports configuration
+// ─────────────────────────────────────────────────────────────
+// SUPPORTED SPORTS
+//
+// Cricket       → CricData.org free API  (100 req/day)
+// All others    → API-Sports free APIs   (100 req/day EACH, separate quotas)
+//
+// "featured" sports appear on the home page dashboard.
+// All sports appear on the Explore page and in the nav dropdown.
+// ─────────────────────────────────────────────────────────────
 export const SUPPORTED_SPORTS = [
+  // ── Featured on dashboard ──
   {
     id: 'cricket',
     name: 'Cricket',
     icon: '🏏',
     color: 'green',
+    gradient: 'from-emerald-500 to-green-600',
     enabled: true,
-    description: 'Follow live cricket scores, series, and community discussions'
+    featured: true,
+    description: 'Live scores, series info & match details',
+    provider: 'CricData.org',
+    apiType: 'cricdata',
   },
   {
     id: 'football',
     name: 'Football',
     icon: '⚽',
     color: 'blue',
+    gradient: 'from-blue-500 to-indigo-600',
     enabled: true,
-    description: 'Track football matches, leagues, and connect with fans'
+    featured: true,
+    description: 'Live fixtures, league standings & match stats',
+    provider: 'API-Sports',
+    apiType: 'apisports',
   },
   {
     id: 'basketball',
     name: 'Basketball',
     icon: '🏀',
     color: 'orange',
+    gradient: 'from-orange-500 to-amber-600',
     enabled: true,
-    description: 'Follow NBA, leagues and basketball tournaments worldwide'
+    featured: true,
+    description: 'NBA, international leagues & live game scores',
+    provider: 'API-Sports',
+    apiType: 'apisports',
   },
-  {
-    id: 'tennis',
-    name: 'Tennis',
-    icon: '🎾',
-    color: 'yellow',
-    enabled: true,
-    description: 'Track Grand Slams, ATP, WTA tours and tennis matches'
-  },
+
+  // ── Other API-Sports ──
   {
     id: 'baseball',
     name: 'Baseball',
     icon: '⚾',
     color: 'red',
+    gradient: 'from-red-500 to-rose-600',
     enabled: true,
-    description: 'Follow MLB, leagues and baseball games'
-  },
-  {
-    id: 'rugby',
-    name: 'Rugby',
-    icon: '🏉',
-    color: 'brown',
-    enabled: true,
-    description: 'Track rugby union, league matches and tournaments'
+    featured: false,
+    description: 'MLB, international baseball leagues & scores',
+    provider: 'API-Sports',
+    apiType: 'apisports',
   },
   {
     id: 'hockey',
     name: 'Hockey',
     icon: '🏒',
     color: 'teal',
+    gradient: 'from-teal-500 to-cyan-600',
     enabled: true,
-    description: 'Follow NHL, field hockey and ice hockey matches'
+    featured: false,
+    description: 'NHL, ice hockey leagues & live scores',
+    provider: 'API-Sports',
+    apiType: 'apisports',
+  },
+  {
+    id: 'rugby',
+    name: 'Rugby',
+    icon: '🏉',
+    color: 'amber',
+    gradient: 'from-amber-600 to-yellow-600',
+    enabled: true,
+    featured: false,
+    description: 'Rugby union & league matches worldwide',
+    provider: 'API-Sports',
+    apiType: 'apisports',
   },
   {
     id: 'volleyball',
     name: 'Volleyball',
     icon: '🏐',
-    color: 'blue',
+    color: 'indigo',
+    gradient: 'from-indigo-500 to-violet-600',
     enabled: true,
-    description: 'Track volleyball matches and championships'
-  },
-  {
-    id: 'badminton',
-    name: 'Badminton',
-    icon: '🏸',
-    color: 'green',
-    enabled: true,
-    description: 'Follow BWF tournaments and badminton matches'
-  },
-  {
-    id: 'table-tennis',
-    name: 'Table Tennis',
-    icon: '🏓',
-    color: 'red',
-    enabled: true,
-    description: 'Track table tennis matches and ITTF events'
-  },
-  {
-    id: 'golf',
-    name: 'Golf',
-    icon: '⛳',
-    color: 'green',
-    enabled: true,
-    description: 'Follow PGA, major championships and golf tournaments'
-  },
-  {
-    id: 'boxing',
-    name: 'Boxing',
-    icon: '🥊',
-    color: 'red',
-    enabled: true,
-    description: 'Track boxing matches and championship fights'
-  },
-  {
-    id: 'mma',
-    name: 'MMA/UFC',
-    icon: '🤼',
-    color: 'red',
-    enabled: true,
-    description: 'Follow UFC, MMA events and mixed martial arts'
-  },
-  {
-    id: 'formula1',
-    name: 'Formula 1',
-    icon: '🏎️',
-    color: 'red',
-    enabled: true,
-    description: 'Track F1 races, standings and motorsport'
-  },
-  {
-    id: 'cycling',
-    name: 'Cycling',
-    icon: '🚴',
-    color: 'yellow',
-    enabled: true,
-    description: 'Follow Tour de France and cycling races'
-  },
-  {
-    id: 'swimming',
-    name: 'Swimming',
-    icon: '🏊',
-    color: 'blue',
-    enabled: true,
-    description: 'Track swimming championships and olympic events'
-  },
-  {
-    id: 'athletics',
-    name: 'Athletics',
-    icon: '🏃',
-    color: 'orange',
-    enabled: true,
-    description: 'Follow track and field, marathon events'
-  },
-  {
-    id: 'wrestling',
-    name: 'Wrestling',
-    icon: '🤼',
-    color: 'purple',
-    enabled: true,
-    description: 'Track wrestling championships and WWE events'
-  },
-  {
-    id: 'esports',
-    name: 'E-Sports',
-    icon: '🎮',
-    color: 'purple',
-    enabled: true,
-    description: 'Follow gaming tournaments, Dota2, CS:GO, LOL'
+    featured: false,
+    description: 'International volleyball leagues & scores',
+    provider: 'API-Sports',
+    apiType: 'apisports',
   },
   {
     id: 'handball',
     name: 'Handball',
     icon: '🤾',
-    color: 'blue',
+    color: 'purple',
+    gradient: 'from-purple-500 to-fuchsia-600',
     enabled: true,
-    description: 'Track handball matches and championships'
+    featured: false,
+    description: 'European & international handball matches',
+    provider: 'API-Sports',
+    apiType: 'apisports',
   },
   {
-    id: 'kabaddi',
-    name: 'Kabaddi',
-    icon: '🤸',
-    color: 'orange',
+    id: 'american-football',
+    name: 'NFL',
+    icon: '🏈',
+    color: 'emerald',
+    gradient: 'from-emerald-600 to-green-700',
     enabled: true,
-    description: 'Follow Pro Kabaddi League and kabaddi matches'
-  }
+    featured: false,
+    description: 'NFL, American football games & scores',
+    provider: 'API-Sports',
+    apiType: 'apisports',
+  },
+  {
+    id: 'afl',
+    name: 'AFL',
+    icon: '🏉',
+    color: 'sky',
+    gradient: 'from-sky-500 to-blue-600',
+    enabled: true,
+    featured: false,
+    description: 'Australian Football League matches & scores',
+    provider: 'API-Sports',
+    apiType: 'apisports',
+  },
+  {
+    id: 'formula-1',
+    name: 'Formula 1',
+    icon: '🏎️',
+    color: 'red',
+    gradient: 'from-red-600 to-orange-600',
+    enabled: true,
+    featured: false,
+    description: 'F1 races, standings & driver stats',
+    provider: 'API-Sports',
+    apiType: 'apisports',
+  },
+  {
+    id: 'mma',
+    name: 'MMA',
+    icon: '🥊',
+    color: 'rose',
+    gradient: 'from-rose-600 to-red-700',
+    enabled: true,
+    featured: false,
+    description: 'UFC, MMA fight events & results',
+    provider: 'API-Sports',
+    apiType: 'apisports',
+  },
+  {
+    id: 'nba',
+    name: 'NBA',
+    icon: '🏀',
+    color: 'orange',
+    gradient: 'from-orange-600 to-red-600',
+    enabled: true,
+    featured: false,
+    description: 'NBA games, scores & player stats',
+    provider: 'API-Sports',
+    apiType: 'apisports',
+  },
 ];
+
+// Helper: get only featured sports (shown on home/dashboard)
+export const FEATURED_SPORTS = SUPPORTED_SPORTS.filter(s => s.featured);
 
 // Alias for backward compatibility
 export const SPORTS = SUPPORTED_SPORTS;
@@ -302,9 +328,9 @@ export const API_ENDPOINTS = {
 
 // App configuration
 export const APP_CONFIG = {
-  appName: 'MatchArena',
-  appTagline: 'Real-time Sports Tracking & Community',
-  appDescription: 'Track live scores and engage with sports communities',
+  appName: 'Track Your Sport',
+  appTagline: 'Real-time Cricket, Football & Many More Sports Scores',
+  appDescription: 'Track live scores for cricket, football, basketball, hockey, rugby and many more sports with community discussions',
   defaultSport: 'cricket',
   postsPerPage: 20,
   commentsPerPage: 50,
@@ -313,12 +339,12 @@ export const APP_CONFIG = {
   maxCommentLength: 10000,
   maxTitleLength: 200,
   minTitleLength: 3,
-  voteCooldown: 1000, // milliseconds
-  searchDebounce: 300, // milliseconds
-  realtimePollingInterval: 60000, // 1 minute
-  cacheTimeout: 300000, // 5 minutes
-  offlineMessageDelay: 3000, // 3 seconds
-  maxFileSize: 5242880, // 5MB
+  voteCooldown: 1000,
+  searchDebounce: 300,
+  realtimePollingInterval: 600000, // 10 minutes
+  cacheTimeout: 300000,
+  offlineMessageDelay: 3000,
+  maxFileSize: 5242880,
   allowedImageTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
   maxReportLength: 500,
   moderatorBadgeColor: 'purple',

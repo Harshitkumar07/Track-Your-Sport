@@ -1,311 +1,209 @@
 /**
- * Frontend API Service for MatchArena
- * Now uses Firebase Functions for secure, real-time sports data
+ * Unified API Service for Track Your Sport
+ *
+ * Architecture:
+ *   Cricket  → Vercel /api/cricket-*   → CricData.org
+ *   Football → Vercel /api/football-*  → API-Football
+ *   Others   → Vercel /api/sports-proxy?sport=X&status=Y → API-Sports (12 sports)
+ *
+ * Each API-Sports sport has its own 100 req/day free quota.
+ * Client-side caching + request dedup keeps usage well under limits.
  */
+
+// ─── Cache durations (ms) ────────────────────────────────────
+const CACHE = {
+  LIVE:     5  * 60 * 1000,      // 5 min  – live scores
+  UPCOMING: 20 * 60 * 1000,      // 20 min – upcoming fixtures
+  RECENT:   30 * 60 * 1000,      // 30 min – recent results
+  SERIES:   60 * 60 * 1000,      // 1 hr   – series/league info
+  STATIC:   24 * 60 * 60 * 1000, // 24 hr  – sport lists, health
+};
+
+export const DASHBOARD_REFRESH_INTERVAL = 10 * 60 * 1000; // 10 min
 
 class APIService {
   constructor() {
-    // Firebase Functions API base URL
-    this.functionsBase = process.env.NODE_ENV === 'development' 
-      ? 'http://localhost:5001/matcharena-app-e3d24/us-central1/api'
-      : '/api';
-    
-    // Request cache to improve performance
+    this.baseUrl =
+      process.env.REACT_APP_VERCEL_API_URL ||
+      'https://matcharena-api.vercel.app/api';
     this.cache = new Map();
-    this.cacheExpiry = 15 * 1000; // 15 seconds for live data
-    this.standardCacheExpiry = 2 * 60 * 1000; // 2 minutes for static data
-    
-    // Clear any existing cache on initialization
-    this.clearCache();
-    console.log('🚀 APIService initialized with real API integration');
-  }
-  
-  // Clear all cached data
-  clearCache() {
-    this.cache.clear();
-    console.log('🗑️ API cache cleared');
+    this.inflight = new Map();
   }
 
-  // Generic request method with caching for Firebase Functions
-  async makeRequest(endpoint, options = {}) {
-    const url = `${this.functionsBase}${endpoint}`;
-    const cacheKey = endpoint + JSON.stringify(options);
-    const cached = this.cache.get(cacheKey);
-    
-    // Determine cache expiry based on endpoint
-    const isLive = endpoint.includes('/live') || endpoint.includes('matches/live');
-    const expiry = isLive ? this.cacheExpiry : this.standardCacheExpiry;
-    
-    if (cached && Date.now() - cached.timestamp < expiry) {
-      console.log('Cache hit for:', endpoint);
-      return cached.data;
-    }
+  // ==================== CORE FETCH ====================
 
-    try {
-      console.log('Making API request to:', url);
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers
-        },
-        ...options
-      });
+  async _fetch(endpoint, cacheDuration) {
+    const key = endpoint;
 
-      if (!response.ok) {
-        throw new Error(`Firebase Function error! status: ${response.status} for ${endpoint}`);
+    // Fresh cache?
+    const cached = this.cache.get(key);
+    if (cached && Date.now() - cached.ts < cacheDuration) return cached.data;
+
+    // Dedup in-flight
+    if (this.inflight.has(key)) return this.inflight.get(key);
+
+    const promise = (async () => {
+      try {
+        const res = await fetch(`${this.baseUrl}${endpoint}`, {
+          headers: { Accept: 'application/json' },
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const json = await res.json();
+        const data =
+          json.success !== undefined ? (json.data ?? []) :
+          Array.isArray(json) ? json : [];
+
+        this.cache.set(key, { data, ts: Date.now() });
+        return data;
+      } catch (err) {
+        console.warn(`⚠️ API ${endpoint}:`, err.message);
+        if (cached) return cached.data;   // stale fallback
+        return [];
+      } finally {
+        this.inflight.delete(key);
       }
+    })();
 
-      const result = await response.json();
-      
-      // For static JSON files, the result IS the data we want
-      // Check if it has the expected format
-      if (result && typeof result === 'object') {
-        // If it has success property, it's our API format
-        if (result.success !== undefined) {
-          if (!result.success) {
-            throw new Error(result.error || `API request failed for ${endpoint}`);
-          }
-          
-          // Cache the response data
-          this.cache.set(cacheKey, {
-            data: result.data || result,
-            timestamp: Date.now()
-          });
-
-          return result.data || result;
-        } else {
-          // Direct JSON data
-          this.cache.set(cacheKey, {
-            data: result,
-            timestamp: Date.now()
-          });
-
-          return result;
-        }
-      }
-      
-      // Cache the response data
-      this.cache.set(cacheKey, {
-        data: result,
-        timestamp: Date.now()
-      });
-
-      return result;
-    } catch (error) {
-      console.error('Firebase Function request failed:', endpoint, error);
-      
-      // Return cached data if available, even if expired
-      if (cached) {
-        console.log('Using expired cache due to error for:', endpoint);
-        return cached.data;
-      }
-      
-      // Return empty array/object as fallback
-      return Array.isArray(options.fallback) ? [] : options.fallback || {};
-    }
+    this.inflight.set(key, promise);
+    return promise;
   }
 
-  // ============ CRICKET API METHODS ============
-  
-  // Get cricket matches by type (live, upcoming, recent)
-  async getCricketMatches(type = 'live') {
-    try {
-      console.log(`🏏 Fetching ${type} cricket matches...`);
-      return await this.makeRequest(`/cricket/${type}`, { fallback: [] });
-    } catch (error) {
-      console.error(`Error fetching ${type} cricket matches:`, error);
-      return [];
+  // ==================== CRICKET (CricData.org) ====================
+
+  async getCricketLive()     { return (await this._fetch('/cricket-live', CACHE.LIVE)).map(normalizeCricketMatch); }
+  async getCricketUpcoming() { return (await this._fetch('/cricket-upcoming', CACHE.UPCOMING)).map(normalizeCricketMatch); }
+  async getCricketRecent()   { return (await this._fetch('/cricket-recent', CACHE.RECENT)).map(normalizeCricketMatch); }
+  async getCricketSeries()   { return (await this._fetch('/cricket-series', CACHE.SERIES)).map(normalizeCricketSeries); }
+
+  // ==================== FOOTBALL (dedicated endpoints) ====================
+
+  async getFootballLive()     { return this._fetch('/football-live', CACHE.LIVE); }
+  async getFootballUpcoming() { return this._fetch('/football-upcoming', CACHE.UPCOMING); }
+
+  // ==================== GENERIC SPORT (API-Sports proxy) ====================
+
+  /**
+   * Fetch live or upcoming data for ANY API-Sports sport.
+   * sport: 'basketball' | 'hockey' | 'baseball' | 'rugby' | ...
+   * status: 'live' | 'upcoming'
+   */
+  async getSportData(sport, status = 'live') {
+    // Use dedicated endpoints for cricket
+    if (sport === 'cricket') {
+      if (status === 'live') return this.getCricketLive();
+      if (status === 'upcoming') return this.getCricketUpcoming();
+      if (status === 'recent') return this.getCricketRecent();
     }
+    // Use dedicated endpoints for football live/upcoming
+    if (sport === 'football' && (status === 'live' || status === 'upcoming')) {
+      return status === 'live' ? this.getFootballLive() : this.getFootballUpcoming();
+    }
+    // All other sports + football recent go through the generic proxy
+    const cacheDuration = status === 'live' ? CACHE.LIVE : status === 'recent' ? CACHE.RECENT : CACHE.UPCOMING;
+    return this._fetch(`/sports-proxy?sport=${sport}&status=${status}`, cacheDuration);
   }
 
-  // Get cricket match details
-  async getCricketMatchDetail(matchId) {
-    try {
-      console.log(`🏏 Fetching cricket match detail for ${matchId}...`);
-      return await this.makeRequest(`/cricket/match/${matchId}`);
-    } catch (error) {
-      console.error('Error fetching cricket match detail:', error);
-      return null;
-    }
-  }
+  // ==================== DASHBOARD ====================
 
-  // Get cricket series
-  async getCricketSeries() {
-    try {
-      console.log('🏏 Fetching cricket series...');
-      return await this.makeRequest('/cricket/series', { fallback: [] });
-    } catch (error) {
-      console.error('Error fetching cricket series:', error);
-      return [];
-    }
-  }
-
-  // ============ MULTI-SPORT API METHODS ============
-  
-  // Get all supported sports
-  async getSupportedSports() {
-    try {
-      console.log('🌐 Fetching supported sports list...');
-      return await this.makeRequest('/sports/list', { fallback: [] });
-    } catch (error) {
-      console.error('Error fetching supported sports:', error);
-      return this.getFallbackSportsList();
-    }
-  }
-
-  // Get fixtures for any sport
-  async getSportFixtures(sport, status = null, league = null, season = null) {
-    try {
-      let endpoint = `/sports/${sport}/${status || 'upcoming'}`;
-      const params = new URLSearchParams();
-      
-      if (league) params.append('league', league);  
-      if (season) params.append('season', season);
-      
-      if (params.toString()) {
-        endpoint += `?${params.toString()}`;
-      }
-      
-      console.log(`🏈 Fetching ${sport} fixtures...`);
-      return await this.makeRequest(endpoint, { fallback: [] });
-    } catch (error) {
-      console.error(`Error fetching ${sport} fixtures:`, error);
-      return [];
-    }
-  }
-
-  // Get leagues for any sport
-  async getSportLeagues(sport) {
-    try {
-      console.log(`🏆 Fetching ${sport} leagues...`);
-      return await this.makeRequest(`/sports/${sport}/leagues`, { fallback: [] });
-    } catch (error) {
-      console.error(`Error fetching ${sport} leagues:`, error);
-      return [];
-    }
-  }
-
-  // Get all live matches from all sports
-  async getAllLiveMatches() {
-    try {
-      console.log('🔴 Fetching all live matches...');
-      return await this.makeRequest('/matches/live', { fallback: [] });
-    } catch (error) {
-      console.error('Error fetching all live matches:', error);
-      return [];
-    }
-  }
-
-  // Get all upcoming matches from all sports  
-  async getAllUpcomingMatches(days = 7) {
-    try {
-      console.log(`📅 Fetching upcoming matches for ${days} days...`);
-      return await this.makeRequest(`/matches/upcoming?days=${days}`, { fallback: [] });
-    } catch (error) {
-      console.error('Error fetching upcoming matches:', error);
-      return [];
-    }
-  }
-
-  // ============ DASHBOARD API METHODS ============
-  
-  // Get comprehensive dashboard data
+  /**
+   * Home page data – only fetches FEATURED sports (cricket + football + basketball).
+   * Other sports are lazy-loaded when user navigates to them.
+   * This keeps total API calls to ~3 on page load.
+   */
   async getDashboardData() {
-    try {
-      console.log('📊 Fetching dashboard data...');
-      
-      const [cricketLive, cricketUpcoming, cricketSeries, allLive, allUpcoming, sports] = await Promise.all([
-        this.getCricketMatches('live'),
-        this.getCricketMatches('upcoming'), 
-        this.getCricketSeries(),
-        this.getAllLiveMatches(),
-        this.getAllUpcomingMatches(7),
-        this.getSupportedSports()
-      ]);
-      
-      return {
-        cricket: {
-          live: cricketLive,
-          upcoming: cricketUpcoming,
-          series: cricketSeries
-        },
-        allSports: {
-          live: allLive,
-          upcoming: allUpcoming,
-          supported: sports
-        },
-        summary: {
-          totalLive: allLive.length,
-          totalUpcoming: allUpcoming.length,
-          cricketLive: cricketLive.length,
-          totalSports: sports.length
-        },
-        lastUpdated: Date.now()
-      };
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-      return {
-        cricket: { live: [], upcoming: [], series: [] },
-        allSports: { live: [], upcoming: [], supported: [] },
-        summary: { totalLive: 0, totalUpcoming: 0, cricketLive: 0, totalSports: 0 },
-        lastUpdated: Date.now(),
-        error: error.message
-      };
+    const [cricLive, fbLive, bbLive] = await Promise.allSettled([
+      this.getCricketLive(),
+      this.getFootballLive(),
+      this.getSportData('basketball', 'live'),
+    ]);
+
+    const cricket    = cricLive.status === 'fulfilled' ? cricLive.value : [];
+    const football   = fbLive.status   === 'fulfilled' ? fbLive.value   : [];
+    const basketball = bbLive.status   === 'fulfilled' ? bbLive.value   : [];
+
+    return {
+      cricket:    { live: cricket },
+      football:   { live: football },
+      basketball: { live: basketball },
+      allLive: [...cricket, ...football, ...basketball],
+      summary: {
+        totalLive:      cricket.length + football.length + basketball.length,
+        cricketLive:    cricket.length,
+        footballLive:   football.length,
+        basketballLive: basketball.length,
+      },
+      lastUpdated: Date.now(),
+    };
+  }
+
+  // ==================== HEALTH ====================
+
+  async checkHealth() {
+    try { return (await fetch(`${this.baseUrl}/health`)).json(); }
+    catch { return { status: 'unreachable' }; }
+  }
+
+  // ==================== CACHE ====================
+
+  clearCache(pattern) {
+    if (!pattern) { this.cache.clear(); return; }
+    for (const k of this.cache.keys()) if (k.includes(pattern)) this.cache.delete(k);
+  }
+
+  refreshLive() {
+    this.clearCache('live');
+    return this.getDashboardData();
+  }
+
+  getCacheStats() {
+    const out = [];
+    for (const [k, v] of this.cache.entries()) {
+      out.push({ key: k, age: Math.round((Date.now() - v.ts) / 1000) + 's', items: Array.isArray(v.data) ? v.data.length : '—' });
     }
-  }
-
-  // ============ UTILITY METHODS ============
-  
-  // API health check
-  async checkAPIHealth() {
-    try {
-      console.log('🩺 Checking API health...');
-      return await this.makeRequest('/health');
-    } catch (error) {
-      console.error('API health check failed:', error);
-      return { status: 'unhealthy', error: error.message };
-    }
-  }
-
-  // Get API status and configuration
-  async getAPIStatus() {
-    try {
-      console.log('📊 Fetching API status...');
-      return await this.makeRequest('/status');
-    } catch (error) {
-      console.error('Error fetching API status:', error);
-      return { configured: false, error: error.message };
-    }
-  }
-
-  // Fallback sports list if API fails
-  getFallbackSportsList() {
-    return [
-      { id: 'football', name: 'Football', icon: '⚽', endpoint: 'football' },
-      { id: 'basketball', name: 'Basketball', icon: '🏀', endpoint: 'basketball' },
-      { id: 'tennis', name: 'Tennis', icon: '🎾', endpoint: 'tennis' },
-      { id: 'hockey', name: 'Hockey', icon: '🏒', endpoint: 'hockey' },
-      { id: 'volleyball', name: 'Volleyball', icon: '🏐', endpoint: 'volleyball' },
-      { id: 'handball', name: 'Handball', icon: '🤾', endpoint: 'handball' },
-      { id: 'rugby', name: 'Rugby', icon: '🏉', endpoint: 'rugby' },
-      { id: 'baseball', name: 'Baseball', icon: '⚾', endpoint: 'baseball' }
-    ];
-  }
-
-  // Group matches by sport
-  groupMatchesBySport(matches) {
-    return matches.reduce((grouped, match) => {
-      const sport = match.sport || 'unknown';
-      if (!grouped[sport]) {
-        grouped[sport] = [];
-      }
-      grouped[sport].push(match);
-      return grouped;
-    }, {});
+    return out;
   }
 }
 
-// Export singleton instance
+// ==================== DATA NORMALIZERS ====================
+
+function normalizeCricketMatch(m) {
+  if (!m) return null;
+  const tA = m.teamInfo?.[0] || {};
+  const tB = m.teamInfo?.[1] || {};
+  const sA = m.score?.[0] || {};
+  const sB = m.score?.[1] || {};
+
+  let status = 'upcoming';
+  if (m.matchStarted && !m.matchEnded) status = 'live';
+  else if (m.matchEnded) status = 'completed';
+
+  return {
+    id: m.id, sport: 'cricket', sportIcon: '🏏',
+    name: m.name || `${tA.name || m.teams?.[0] || 'TBA'} vs ${tB.name || m.teams?.[1] || 'TBA'}`,
+    status, matchType: m.matchType || '',
+    homeTeam: { name: tA.name || m.teams?.[0] || 'TBA', short: tA.shortname || '', logo: tA.img || '' },
+    awayTeam: { name: tB.name || m.teams?.[1] || 'TBA', short: tB.shortname || '', logo: tB.img || '' },
+    score: {
+      home: sA.r != null ? `${sA.r}/${sA.w ?? '?'} (${sA.o ?? '?'})` : '',
+      away: sB.r != null ? `${sB.r}/${sB.w ?? '?'} (${sB.o ?? '?'})` : '',
+    },
+    venue: m.venue || '', league: '', date: m.dateTimeGMT || m.date || '',
+    statusText: m.status || '', raw: m,
+  };
+}
+
+function normalizeCricketSeries(s) {
+  if (!s) return null;
+  return {
+    id: s.id, name: s.name || 'Unknown Series',
+    startDate: s.startDate || '', endDate: s.endDate || '',
+    odi: s.odi || 0, t20: s.t20 || 0, test: s.test || 0,
+    squads: s.squads || 0, matches: s.matches || 0,
+  };
+}
+
+// ==================== SINGLETON ====================
+
 export const apiService = new APIService();
 export default apiService;

@@ -1,363 +1,216 @@
-import React, { useState, useEffect } from 'react';
-import { ref, onValue, off } from 'firebase/database';
-import { database } from '../services/firebase/firebaseClient';
-import { Trophy, Clock, Users, Star, Activity, TrendingUp } from 'lucide-react';
-import CricketScorecard from './cricket/CricketScorecard';
-import FootballMatchCenter from './football/FootballMatchCenter';
-import BasketballGameCenter from './basketball/BasketballGameCenter';
-import MultiSportWidget from './MultiSportWidget';
-import LiveMatchesTicker from './LiveMatchesTicker';
-import RealTimeNotifications from './RealTimeNotifications';
-import { useLiveMatches, useConnectionStatus } from '../hooks/useRealTimeUpdates';
-import apiService from '../services/apiService';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Trophy, Clock, TrendingUp, RefreshCw } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
+import MatchCard from './MatchCard';
+import apiService, { DASHBOARD_REFRESH_INTERVAL } from '../services/apiService';
+import { SUPPORTED_SPORTS, FEATURED_SPORTS, APP_CONFIG } from '../config/routes';
 
+/**
+ * Sports Dashboard – shows live/upcoming data for all supported sports.
+ * Featured sports (cricket, football, basketball) are fetched on load.
+ * Other sports are lazy-loaded when user selects them.
+ */
 const SportsDashboard = () => {
+  const { isDark } = useTheme();
   const [selectedSport, setSelectedSport] = useState('cricket');
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    totalLiveMatches: 0,
-    totalUpcoming: 0,
-    popularSports: []
-  });
+  const [refreshing, setRefreshing] = useState(false);
+  const [sportData, setSportData] = useState({}); // { [sportId]: { live: [], upcoming: [] } }
+  const [lastUpdated, setLastUpdated] = useState(null);
 
-  // Use real-time hooks
-  const { liveMatches: realTimeLiveMatches, loading: liveLoading } = useLiveMatches();
-  const { status: connectionStatus } = useConnectionStatus();
-  
-  // API data state
-  const [apiData, setApiData] = useState({
-    cricket: [],
-    football: [],
-    basketball: [],
-    badminton: [],
-    tennis: [],
-    tableTennis: [],
-    volleyball: []
-  });
-
-  // Asian-focused sports configuration
-  const sportsConfig = {
-    cricket: {
-      name: 'Cricket',
-      icon: '🏏',
-      color: 'bg-green-500',
-      gradient: 'from-green-400 to-green-600',
-      leagues: ['IPL', 'Asia Cup', 'T20 World Cup', 'Test Series'],
-      component: CricketScorecard
-    },
-    football: {
-      name: 'Football',
-      icon: '⚽',
-      color: 'bg-blue-500',
-      gradient: 'from-blue-400 to-blue-600',
-      leagues: ['ISL', 'AFC Champions League', 'Asian Cup', 'J-League'],
-      component: FootballMatchCenter
-    },
-    basketball: {
-      name: 'Basketball',
-      icon: '🏀',
-      color: 'bg-orange-500',
-      gradient: 'from-orange-400 to-orange-600',
-      leagues: ['CBA', 'B.League', 'KBL', 'PBA'],
-      component: BasketballGameCenter
-    },
-    badminton: {
-      name: 'Badminton',
-      icon: '🏸',
-      color: 'bg-purple-500',
-      gradient: 'from-purple-400 to-purple-600',
-      leagues: ['BWF World Tour', 'All England', 'Indonesia Open', 'Malaysia Open'],
-      component: MultiSportWidget
-    },
-    tennis: {
-      name: 'Tennis',
-      icon: '🎾',
-      color: 'bg-yellow-500',
-      gradient: 'from-yellow-400 to-yellow-600',
-      leagues: ['ATP Shanghai', 'WTA Beijing', 'Japan Open', 'Korea Open'],
-      component: MultiSportWidget
-    },
-    tableTennis: {
-      name: 'Table Tennis',
-      icon: '🏓',
-      color: 'bg-red-500',
-      gradient: 'from-red-400 to-red-600',
-      leagues: ['WTT China Smash', 'Asian Games', 'Japan Open', 'Korea Open'],
-      component: MultiSportWidget
-    },
-    volleyball: {
-      name: 'Volleyball',
-      icon: '🏐',
-      color: 'bg-indigo-500',
-      gradient: 'from-indigo-400 to-indigo-600',
-      leagues: ['V.League', 'KOVO', 'Asian Games', 'Chinese League'],
-      component: MultiSportWidget
+  // Initial load – fetch featured sports live data
+  const fetchFeatured = useCallback(async (showLoader = false) => {
+    if (showLoader) setLoading(true);
+    try {
+      const results = await Promise.allSettled(
+        FEATURED_SPORTS.map(sp => apiService.getSportData(sp.id, 'live'))
+      );
+      const newData = {};
+      FEATURED_SPORTS.forEach((sp, i) => {
+        newData[sp.id] = {
+          live: results[i].status === 'fulfilled' ? results[i].value : [],
+          upcoming: sportData[sp.id]?.upcoming || [],
+        };
+      });
+      setSportData(prev => ({ ...prev, ...newData }));
+      setLastUpdated(new Date());
+    } catch (err) {
+      console.error('Dashboard fetch error:', err);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [sportData]);
 
   useEffect(() => {
-    const fetchAPIData = async () => {
-      setLoading(true);
-      console.log('🔄 Fetching real API data...');
-      
-      try {
-        // Fetch data from all APIs in parallel
-        const [cricketMatches, footballMatches, basketballMatches] = await Promise.allSettled([
-          apiService.getCricketMatches(),
-          apiService.getFootballMatches(), 
-          apiService.getBasketballMatches()
-        ]);
-
-        // Fetch multi-sport data
-        const [badmintonMatches, tennisMatches, tableTennisMatches, volleyballMatches] = await Promise.allSettled([
-          apiService.getMultiSportMatches('badminton'),
-          apiService.getMultiSportMatches('tennis'),
-          apiService.getMultiSportMatches('tableTennis'),
-          apiService.getMultiSportMatches('volleyball')
-        ]);
-
-        // Process results
-        const newApiData = {
-          cricket: cricketMatches.status === 'fulfilled' ? cricketMatches.value : [],
-          football: footballMatches.status === 'fulfilled' ? footballMatches.value : [],
-          basketball: basketballMatches.status === 'fulfilled' ? basketballMatches.value : [],
-          badminton: badmintonMatches.status === 'fulfilled' ? badmintonMatches.value : [],
-          tennis: tennisMatches.status === 'fulfilled' ? tennisMatches.value : [],
-          tableTennis: tableTennisMatches.status === 'fulfilled' ? tableTennisMatches.value : [],
-          volleyball: volleyballMatches.status === 'fulfilled' ? volleyballMatches.value : []
-        };
-
-        setApiData(newApiData);
-
-        // Calculate stats
-        const allMatches = Object.values(newApiData).flat();
-        const liveMatches = allMatches.filter(m => m.status === 'live' || m.status === 'Live');
-        const upcomingMatches = allMatches.filter(m => m.status === 'upcoming' || m.status === 'Upcoming');
-
-        setStats({
-          totalLiveMatches: liveMatches.length,
-          totalUpcoming: upcomingMatches.length,
-          popularSports: Object.keys(sportsConfig)
-        });
-
-        console.log('✅ API data loaded:', {
-          cricket: newApiData.cricket.length,
-          football: newApiData.football.length,
-          basketball: newApiData.basketball.length,
-          total: allMatches.length
-        });
-
-      } catch (error) {
-        console.error('❌ Failed to fetch API data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAPIData();
-    
-    // Set up polling for live updates every 2 minutes
-    const interval = setInterval(fetchAPIData, 2 * 60 * 1000);
-    
-    return () => clearInterval(interval);
+    fetchFeatured(true);
+    const id = setInterval(() => fetchFeatured(false), DASHBOARD_REFRESH_INTERVAL);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const SportCard = ({ sportKey, config, isActive, onClick }) => {
-    const liveCount = liveMatches[sportKey]?.length || 0;
-    
-    return (
-      <div
-        onClick={() => onClick(sportKey)}
-        className={`relative overflow-hidden rounded-xl cursor-pointer transition-all duration-300 transform hover:scale-105 ${
-          isActive 
-            ? `bg-gradient-to-r ${config.gradient} text-white shadow-2xl` 
-            : 'bg-white dark:bg-gray-800 hover:shadow-lg border border-gray-200 dark:border-gray-700'
-        }`}
-      >
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <span className="text-3xl">{config.icon}</span>
-              <div>
-                <h3 className={`font-bold text-lg ${isActive ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
-                  {config.name}
-                </h3>
-                <p className={`text-sm ${isActive ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'}`}>
-                  {config.leagues[0]} • {config.leagues[1]}
-                </p>
-              </div>
-            </div>
-            {liveCount > 0 && (
-              <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                isActive 
-                  ? 'bg-white/20 text-white' 
-                  : 'bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300'
-              }`}>
-                {liveCount} LIVE
-              </div>
-            )}
-          </div>
-          
-          <div className="flex items-center justify-between text-sm">
-            <span className={isActive ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'}>
-              Popular in Asia
-            </span>
-            <div className="flex items-center space-x-2">
-              <Users size={16} className={isActive ? 'text-white/80' : 'text-gray-400'} />
-              <span className={isActive ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'}>
-                {Math.floor(Math.random() * 1000)}K
-              </span>
-            </div>
-          </div>
-        </div>
-        
-        {isActive && (
-          <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
-        )}
-      </div>
-    );
+  // Lazy-load data for a sport when selected
+  const loadSport = useCallback(async (sportId) => {
+    if (sportData[sportId]?.live?.length > 0 || sportData[sportId]?.upcoming?.length > 0) return;
+
+    try {
+      const [live, upcoming] = await Promise.allSettled([
+        apiService.getSportData(sportId, 'live'),
+        apiService.getSportData(sportId, 'upcoming'),
+      ]);
+      setSportData(prev => ({
+        ...prev,
+        [sportId]: {
+          live: live.status === 'fulfilled' ? live.value : [],
+          upcoming: upcoming.status === 'fulfilled' ? upcoming.value : [],
+        },
+      }));
+    } catch (err) {
+      console.warn(`Failed to load ${sportId}:`, err);
+    }
+  }, [sportData]);
+
+  // Load upcoming for current sport
+  useEffect(() => {
+    loadSport(selectedSport);
+  }, [selectedSport, loadSport]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    apiService.clearCache();
+    setSportData({});
+    await fetchFeatured(false);
+    await loadSport(selectedSport);
+    setRefreshing(false);
   };
 
-  const StatsCard = ({ icon: Icon, title, value, subtitle, color }) => (
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">{title}</p>
-          <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{value}</p>
-          {subtitle && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{subtitle}</p>
-          )}
-        </div>
-        <div className={`p-3 rounded-lg ${color}`}>
-          <Icon className="w-6 h-6 text-white" />
-        </div>
-      </div>
-    </div>
-  );
+  const current = sportData[selectedSport] || { live: [], upcoming: [] };
+  const allLiveCount = Object.values(sportData).reduce((n, d) => n + (d.live?.length || 0), 0);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-300">Loading Sports Dashboard...</p>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mx-auto mb-4" />
+          <p className={isDark ? 'text-gray-400' : 'text-gray-500'}>Loading Dashboard…</p>
         </div>
       </div>
     );
   }
 
-  const SelectedComponent = sportsConfig[selectedSport].component;
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                MatchArena Sports Center
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300 mt-1">
-                Live scores and updates from across Asia's premier sports leagues
-              </p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className={`flex items-center space-x-2 ${
-                connectionStatus === 'connected' 
-                  ? 'text-green-600 dark:text-green-400' 
-                  : 'text-red-600 dark:text-red-400'
-              }`}>
-                <div className={`w-2 h-2 rounded-full ${
-                  connectionStatus === 'connected' 
-                    ? 'bg-green-500 animate-pulse' 
-                    : 'bg-red-500'
-                }`}></div>
-                <span className="text-sm font-medium">
-                  {connectionStatus === 'connected' ? 'Live Updates' : 'Offline'}
-                </span>
-              </div>
-              <RealTimeNotifications />
-            </div>
-          </div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">{APP_CONFIG.appName} Dashboard</h1>
+          <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+            Live scores across {SUPPORTED_SPORTS.length} sports
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          {lastUpdated && (
+            <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{lastUpdated.toLocaleTimeString()}</span>
+          )}
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              isDark ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            } ${refreshing ? 'opacity-50 cursor-wait' : ''}`}
+          >
+            <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} /> Refresh
+          </button>
         </div>
       </div>
 
-      {/* Live Matches Ticker */}
-      <LiveMatchesTicker matches={apiData} />
+      {/* Stats row */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <StatCard icon={Trophy} title="Live Now" value={allLiveCount} sub="All sports" color="red" isDark={isDark} />
+        <StatCard icon={Clock} title="Upcoming" value={current.upcoming.length} sub={`${selectedSport} fixtures`} color="blue" isDark={isDark} />
+        <StatCard icon={TrendingUp} title="Sports" value={SUPPORTED_SPORTS.length} sub="Available" color="green" isDark={isDark} />
+      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <StatsCard
-            icon={Trophy}
-            title="Live Matches"
-            value={stats.totalLiveMatches}
-            subtitle="Happening now"
-            color="bg-red-500"
-          />
-          <StatsCard
-            icon={Clock}
-            title="Upcoming Today"
-            value={stats.totalUpcoming}
-            subtitle="Next 24 hours"
-            color="bg-blue-500"
-          />
-          <StatsCard
-            icon={TrendingUp}
-            title="Active Sports"
-            value={Object.keys(sportsConfig).length}
-            subtitle="Available now"
-            color="bg-green-500"
-          />
-          <StatsCard
-            icon={Users}
-            title="Total Viewers"
-            value="2.4M"
-            subtitle="Watching live"
-            color="bg-purple-500"
-          />
-        </div>
+      {/* Sport selector – scrollable */}
+      <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+        {SUPPORTED_SPORTS.map((sp) => {
+          const isActive = selectedSport === sp.id;
+          const liveCount = sportData[sp.id]?.live?.length || 0;
+          return (
+            <button
+              key={sp.id}
+              onClick={() => setSelectedSport(sp.id)}
+              className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                isActive
+                  ? `bg-gradient-to-r ${sp.gradient} text-white shadow-lg`
+                  : isDark ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+              }`}
+            >
+              <span>{sp.icon}</span>
+              <span className="hidden sm:inline">{sp.name}</span>
+              {liveCount > 0 && (
+                <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${isActive ? 'bg-white/20' : 'bg-red-500/10 text-red-500'}`}>
+                  {liveCount}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
 
-        {/* Sports Selection Grid */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-            Select Your Sport
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {Object.entries(sportsConfig).map(([sportKey, config]) => (
-              <SportCard
-                key={sportKey}
-                sportKey={sportKey}
-                config={config}
-                isActive={selectedSport === sportKey}
-                onClick={setSelectedSport}
-              />
-            ))}
+      {/* Live */}
+      <div>
+        <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+          Live {SUPPORTED_SPORTS.find(s => s.id === selectedSport)?.name || ''} Matches
+        </h2>
+        {current.live.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {current.live.map(m => <MatchCard key={m.id} match={m} sport={selectedSport} />)}
           </div>
-        </div>
+        ) : (
+          <EmptyState isDark={isDark} message={`No live ${selectedSport} matches right now`} />
+        )}
+      </div>
 
-        {/* Selected Sport Content */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-center space-x-3">
-              <span className="text-2xl">{sportsConfig[selectedSport].icon}</span>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {sportsConfig[selectedSport].name} Center
-              </h2>
-            </div>
-            <p className="text-gray-600 dark:text-gray-300 mt-2">
-              Latest matches, scores, and updates from top Asian leagues
-            </p>
+      {/* Upcoming */}
+      <div>
+        <h2 className="text-lg font-bold mb-4">📅 Upcoming Fixtures</h2>
+        {current.upcoming.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {current.upcoming.slice(0, 9).map(m => <MatchCard key={m.id} match={m} sport={selectedSport} />)}
           </div>
-          
-          <div className="p-6">
-            <SelectedComponent sport={selectedSport} data={apiData[selectedSport]} />
-          </div>
-        </div>
+        ) : (
+          <EmptyState isDark={isDark} message={`No upcoming ${selectedSport} fixtures loaded yet`} />
+        )}
       </div>
     </div>
   );
 };
+
+const StatCard = ({ icon: Icon, title, value, sub, color, isDark }) => {
+  const cl = {
+    red:   isDark ? 'bg-red-500/10 text-red-400'   : 'bg-red-50 text-red-500',
+    blue:  isDark ? 'bg-blue-500/10 text-blue-400'  : 'bg-blue-50 text-blue-500',
+    green: isDark ? 'bg-green-500/10 text-green-400' : 'bg-green-50 text-green-500',
+  };
+  return (
+    <div className={`rounded-xl p-5 border ${isDark ? 'bg-gray-800/80 border-gray-700/60' : 'bg-white border-gray-200'}`}>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{title}</p>
+          <p className="text-2xl font-bold mt-1">{value}</p>
+          <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{sub}</p>
+        </div>
+        <div className={`p-2.5 rounded-lg ${cl[color]}`}><Icon size={20} /></div>
+      </div>
+    </div>
+  );
+};
+
+const EmptyState = ({ isDark, message }) => (
+  <div className={`rounded-xl p-8 text-center ${isDark ? 'bg-gray-800/40' : 'bg-gray-50'}`}>
+    <p className={`text-sm ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{message}</p>
+  </div>
+);
 
 export default SportsDashboard;

@@ -1,145 +1,189 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { formatDistanceToNow } from 'date-fns';
 
-const MatchCard = ({ match, sport = 'cricket', compact = false }) => {
+/**
+ * Unified MatchCard – renders both Cricket and Football matches
+ * using the normalized shape from apiService.js.
+ */
+const MatchCard = ({ match, sport, compact = false }) => {
   const { isDark } = useTheme();
+  const sportId = sport || match?.sport || 'cricket';
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'live':
-        return 'text-red-500';
-      case 'upcoming':
-        return 'text-blue-500';
-      case 'completed':
-        return 'text-gray-500';
-      default:
-        return 'text-gray-400';
-    }
+  if (!match) return null;
+
+  // ─── helpers ──────────────────────────────────────────────
+  const statusColors = {
+    live:      { bg: 'bg-red-500/10', text: 'text-red-500', dot: 'bg-red-500' },
+    upcoming:  { bg: 'bg-blue-500/10', text: 'text-blue-500', dot: 'bg-blue-500' },
+    completed: { bg: 'bg-gray-500/10', text: 'text-gray-500', dot: 'bg-gray-500' },
+  };
+  const sc = statusColors[match.status] || statusColors.upcoming;
+
+  const homeName = match.homeTeam?.name || match.homeTeam || 'TBA';
+  const awayName = match.awayTeam?.name || match.awayTeam || 'TBA';
+  const homeLogo = match.homeTeam?.logo || match.homeTeamLogo || '';
+  const awayLogo = match.awayTeam?.logo || match.awayTeamLogo || '';
+  const homeScore = match.score?.home ?? match.homeScore ?? '';
+  const awayScore = match.score?.away ?? match.awayScore ?? '';
+
+  // ─── Date / time formatting ───────────────────────────────
+  const formatRelativeDate = (d) => {
+    if (!d) return '';
+    try {
+      const dt = new Date(d);
+      if (isNaN(dt.getTime())) return '';
+      const now = new Date();
+
+      // Strip time for day comparison
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const matchDay = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+      const diffDays = Math.round((matchDay - today) / (1000 * 60 * 60 * 24));
+
+      const time = dt.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+      if (diffDays === 0) return `Today, ${time}`;
+      if (diffDays === 1) return `Tomorrow, ${time}`;
+      if (diffDays === -1) return `Yesterday, ${time}`;
+      if (diffDays > 1 && diffDays <= 6) {
+        const day = dt.toLocaleDateString('en-IN', { weekday: 'long' });
+        return `${day}, ${time}`;
+      }
+
+      // Older / further away dates
+      return dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: dt.getFullYear() !== now.getFullYear() ? 'numeric' : undefined }) + `, ${time}`;
+    } catch { return ''; }
   };
 
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case 'live':
-        return (
-          <span className="flex items-center space-x-1">
-            <span className="animate-pulse inline-block w-2 h-2 rounded-full bg-red-500" />
-            <span className="text-xs font-semibold text-red-500">LIVE</span>
-          </span>
-        );
-      case 'upcoming':
-        return <span className="text-xs font-semibold text-blue-500">UPCOMING</span>;
-      case 'completed':
-        return <span className="text-xs font-semibold text-gray-500">COMPLETED</span>;
-      default:
-        return null;
-    }
-  };
+  const dateStr = formatRelativeDate(match.date || match.dateTimeGMT);
 
+  // ─── Compact mode (used in tickers / small lists) ─────────
   if (compact) {
     return (
       <Link
-        to={`/sport/${sport}/match/${match.id || match.key}`}
-        className={`block py-3 px-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors`}
+        to={`/sport/${sportId}/match/${match.id}`}
+        state={{ match }}
+        className={`block py-3 px-4 rounded-lg ${isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-50'} transition-colors`}
       >
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-sm font-medium truncate">
-                {match.teams?.home?.name || match.teams?.home || 'Team A'} vs {match.teams?.away?.name || match.teams?.away || 'Team B'}
-              </span>
-              {getStatusBadge(match.status)}
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-lg">{match.sportIcon || (sportId === 'cricket' ? '🏏' : '⚽')}</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">
+              {homeName} vs {awayName}
+            </p>
+            <div className="flex items-center gap-2 mt-0.5">
+              {match.status === 'live' && (homeScore || awayScore) && (
+                <span className="text-xs font-semibold">{homeScore} • {awayScore}</span>
+              )}
+              {dateStr && (
+                <span className={`text-[11px] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{dateStr}</span>
+              )}
             </div>
-            {match.status === 'live' && match.scores && (
-              <div className="text-xs text-gray-600 dark:text-gray-400">
-                {match.scores.home?.runs}/{match.scores.home?.wickets} ({match.scores.home?.overs}) • 
-                {match.scores.away?.runs}/{match.scores.away?.wickets} ({match.scores.away?.overs})
-              </div>
-            )}
           </div>
+          <span className={`shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${sc.bg} ${sc.text}`}>
+            {match.status === 'live' && <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${sc.dot}`} />}
+            {match.status}
+          </span>
         </div>
       </Link>
     );
   }
 
+  // ─── Full card ────────────────────────────────────────────
   return (
-    <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md hover:shadow-lg transition-shadow p-6`}>
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <h3 className="text-lg font-semibold mb-1">
-            {match.seriesName || match.matchType || 'Match'}
-          </h3>
-          <p className="text-sm text-gray-500">
-            {match.venue || 'Venue TBD'}
-          </p>
+    <div
+      className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:shadow-lg ${
+        isDark
+          ? 'bg-gray-800/80 border-gray-700/60 hover:border-gray-600'
+          : 'bg-white border-gray-200 hover:border-gray-300'
+      } ${match.status === 'live' ? (isDark ? 'ring-1 ring-red-500/30' : 'ring-1 ring-red-400/20') : ''}`}
+    >
+      {/* Top bar: league / match type + status badge */}
+      <div className={`flex items-center justify-between px-5 py-3 border-b ${isDark ? 'border-gray-700/50' : 'border-gray-100'}`}>
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-base">{match.sportIcon || (sportId === 'cricket' ? '🏏' : '⚽')}</span>
+          <span className={`text-xs font-medium truncate ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+            {match.league || match.matchType || sportId.charAt(0).toUpperCase() + sportId.slice(1)}
+          </span>
         </div>
-        {getStatusBadge(match.status)}
+        <span className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${sc.bg} ${sc.text}`}>
+          {match.status === 'live' && <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${sc.dot}`} />}
+          {match.status}
+        </span>
       </div>
 
-      <div className="space-y-3">
-        {/* Team 1 */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            {(match.teams?.home?.logo || match.teams?.homeImg) && (
-              <img 
-                src={match.teams?.home?.logo || match.teams?.homeImg} 
-                alt={match.teams?.home?.name || match.teams?.home || 'Team'}
-                className="w-8 h-8 rounded-full object-cover"
-                onError={(e) => { e.target.style.display = 'none' }}
-              />
-            )}
-            <span className="font-medium">{match.teams?.home?.name || match.teams?.home || 'Team A'}</span>
-          </div>
-          {match.scores?.home && (
-            <span className="font-semibold">
-              {match.scores.home.runs}/{match.scores.home.wickets} 
-              <span className="text-sm text-gray-500 ml-1">({match.scores.home.overs})</span>
-            </span>
+      {/* Date/time bar */}
+      {dateStr && (
+        <div className={`px-5 py-1.5 flex items-center gap-1.5 ${isDark ? 'bg-gray-900/30' : 'bg-gray-50/80'}`}>
+          <svg className={`w-3.5 h-3.5 ${isDark ? 'text-gray-500' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+            {dateStr}
+          </span>
+          {match.status === 'live' && match.elapsed && (
+            <span className="text-xs font-bold text-red-500 ml-auto">{match.elapsed}'</span>
           )}
         </div>
-
-        {/* Team 2 */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            {(match.teams?.away?.logo || match.teams?.awayImg) && (
-              <img 
-                src={match.teams?.away?.logo || match.teams?.awayImg} 
-                alt={match.teams?.away?.name || match.teams?.away || 'Team'}
-                className="w-8 h-8 rounded-full object-cover"
-                onError={(e) => { e.target.style.display = 'none' }}
-              />
-            )}
-            <span className="font-medium">{match.teams?.away?.name || match.teams?.away || 'Team B'}</span>
-          </div>
-          {match.scores?.away && (
-            <span className="font-semibold">
-              {match.scores.away.runs}/{match.scores.away.wickets}
-              <span className="text-sm text-gray-500 ml-1">({match.scores.away.overs})</span>
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Match Status or Result */}
-      {match.statusNote && (
-        <p className={`mt-4 text-sm ${getStatusColor(match.status)}`}>
-          {match.statusNote}
-        </p>
       )}
 
-      {/* Time Info */}
-      <div className="mt-4 flex items-center justify-between">
-        <span className="text-xs text-gray-500">
-          {match.startsAt ? 
-            formatDistanceToNow(new Date(match.startsAt), { addSuffix: true }) : 
-            'Time TBD'}
+      {/* Teams + scores */}
+      <div className="px-5 py-4 space-y-3">
+        {/* Home team */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            {homeLogo ? (
+              <img src={homeLogo} alt={homeName} className="w-7 h-7 rounded-full object-cover shrink-0"
+                onError={(e) => { e.target.style.display = 'none'; }} />
+            ) : (
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+                {(homeName || '?')[0]}
+              </div>
+            )}
+            <span className="font-semibold text-sm truncate">{homeName}</span>
+          </div>
+          {(homeScore !== '' && homeScore !== null && homeScore !== undefined) && (
+            <span className="font-bold text-sm tabular-nums ml-2 shrink-0">{homeScore}</span>
+          )}
+        </div>
+
+        {/* Away team */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            {awayLogo ? (
+              <img src={awayLogo} alt={awayName} className="w-7 h-7 rounded-full object-cover shrink-0"
+                onError={(e) => { e.target.style.display = 'none'; }} />
+            ) : (
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+                {(awayName || '?')[0]}
+              </div>
+            )}
+            <span className="font-semibold text-sm truncate">{awayName}</span>
+          </div>
+          {(awayScore !== '' && awayScore !== null && awayScore !== undefined) && (
+            <span className="font-bold text-sm tabular-nums ml-2 shrink-0">{awayScore}</span>
+          )}
+        </div>
+      </div>
+
+      {/* Status text (e.g. "India needs 42 runs") */}
+      {match.statusText && (
+        <div className={`px-5 py-2 text-xs font-medium ${sc.text} ${isDark ? 'bg-gray-900/40' : 'bg-gray-50'}`}>
+          {match.statusText}
+        </div>
+      )}
+
+      {/* Footer: venue + detail link */}
+      <div className={`flex items-center justify-between px-5 py-3 border-t ${isDark ? 'border-gray-700/50' : 'border-gray-100'}`}>
+        <span className={`text-xs truncate max-w-[60%] ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+          {match.venue ? `📍 ${match.venue}` : ''}
         </span>
         <Link
-          to={`/sport/${sport}/match/${match.id || match.key}`}
-          className="text-sm text-blue-500 hover:text-blue-600 font-medium"
+          to={`/sport/${sportId}/match/${match.id}`}
+          state={{ match }}
+          className="text-xs font-semibold text-blue-500 hover:text-blue-400 transition-colors"
         >
-          View Details →
+          Details →
         </Link>
       </div>
     </div>

@@ -1,56 +1,97 @@
-# MatchArena 🏏⚽🏐
+# Track Your Sport
 
-<img src="public/logo192.png" alt="MatchArena Logo" width="120" />
+A real-time multi-sport score tracking platform built with React, Firebase, and third-party sports APIs. Track live scores, upcoming fixtures, and match details across 13 sports including Cricket, Football, Basketball, Hockey, and more.
 
-**MatchArena** is a production-ready, real-time multi-sport score-tracking and community platform. Track live scores, engage with sports communities, and stay updated with your favorite sports - Cricket, Football, and Kabaddi.
+**Live:** [track-your-sport-c09b4.web.app](https://track-your-sport-c09b4.web.app/)
 
-[![Build Status](https://github.com/Harshitkumar07/MatchArena/workflows/Basic%20Build%20Check/badge.svg)](https://github.com/Harshitkumar07/MatchArena/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+---
 
-## 🚀 Features
+## Features
 
-### Core Features
-- **Real-time Score Updates**: Live scores powered by Firebase Realtime Database
-- **Multi-Sport Support**: Cricket, Football, Kabaddi (easily extensible)
-- **Community Forums**: Reddit-style discussions per sport
-- **User Authentication**: Email/Password and Google OAuth via Firebase Auth
-- **Role-based Access**: User, Moderator, and Admin roles
-- **Responsive Design**: Mobile-first, accessible UI with Tailwind CSS
-- **PWA Support**: Installable progressive web app with offline capabilities
-- **Dark/Light Theme**: User preference-based theme switching
+### Live Score Tracking
+- Real-time scores for Cricket (via CricData.org) and Football, Basketball, Hockey, Rugby, Baseball, Volleyball, Handball, NFL, AFL, Formula 1, MMA, NBA (via API-Sports)
+- Unified match cards with team logos, scores, status badges, and relative date formatting
+- Dashboard with live match counts and quick navigation
 
-### Community Features
-- Create and edit posts with rich text
-- Nested commenting system
-- Upvote/Downvote functionality
-- Content reporting and moderation
-- Real-time notifications
+### Multi-Sport Support
+- 13 sports with dedicated data providers
+- Each sport has independent API quota (100 requests/day per sport on API-Sports)
+- Smart client-side caching (5 min for live, 20 min for upcoming, 30 min for recent)
+- Request deduplication to prevent redundant API calls
+
+### Match Details
+- Detailed match view with team information, venue, date/time, and scores
+- Cricket scorecard with runs, wickets, overs, and run rate
+- Zero extra API calls when navigating from match list (uses React Router state)
+- Fallback to cached data for direct URL access
+
+### Community and User Features
+- User authentication via Google OAuth and email/password (Firebase Auth)
+- Community forums with posts, comments, and voting
 - User profiles and preferences
+- Role-based access control (User, Moderator, Admin)
+- Dark/Light theme switching
 
-### Admin Features
+### Admin Panel
 - Content moderation dashboard
 - User management
-- Match data override capabilities
-- System settings management
-- Reports queue management
+- System settings and reports queue
 
-## 📋 Prerequisites
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 18, React Router v6, Tailwind CSS |
+| State | React Context, React Query |
+| Auth | Firebase Authentication |
+| Database | Firebase Realtime Database |
+| Hosting | Firebase Hosting (frontend), Vercel Serverless Functions (API proxy) |
+| Cricket API | CricData.org |
+| Sports APIs | API-Sports (12 sports) |
+| Build | Create React App, CI=false for production builds |
+
+---
+
+## Architecture
+
+```
+Client (React SPA)
+    |
+    v
+Vercel Serverless Functions (API Proxy)
+    |
+    +---> /api/cricket-live       --> CricData.org
+    +---> /api/cricket-upcoming   --> CricData.org
+    +---> /api/cricket-recent     --> CricData.org
+    +---> /api/cricket-series     --> CricData.org
+    +---> /api/football-live      --> API-Football
+    +---> /api/football-upcoming  --> API-Football
+    +---> /api/sports-proxy       --> API-Sports (all other sports)
+    +---> /api/health             --> Health check
+```
+
+The Vercel proxy layer handles API key injection, CORS, and response normalization. The React client caches responses aggressively to minimize API usage.
+
+---
+
+## Prerequisites
 
 - Node.js 18+ LTS
 - npm 9+
 - Firebase CLI (`npm install -g firebase-tools`)
-- A Firebase project with enabled services:
-  - Authentication
-  - Realtime Database
-  - Cloud Functions
-  - Hosting
+- A Firebase project with Authentication and Realtime Database enabled
+- API keys for CricData.org and API-Sports
 
-## 🛠️ Installation
+---
+
+## Installation
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/Harshitkumar07/MatchArena.git
-cd MatchArena
+git clone https://github.com/Harshitkumar07/Track-Your-Sport.git
+cd Track-Your-Sport
 ```
 
 2. **Install dependencies**
@@ -58,258 +99,142 @@ cd MatchArena
 npm install
 ```
 
-3. **Set up Firebase Functions**
+3. **Configure environment variables**
 ```bash
-cd functions
-npm install
-cd ..
+cp .env.example .env.local
 ```
 
-4. **Configure environment variables**
-```bash
-cp .env.example .env
+Edit `.env.local` with your Firebase config and Vercel API URL:
+```env
+REACT_APP_FIREBASE_API_KEY=your_key
+REACT_APP_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+REACT_APP_FIREBASE_DATABASE_URL=https://your_project.firebaseio.com
+REACT_APP_FIREBASE_PROJECT_ID=your_project
+REACT_APP_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+REACT_APP_FIREBASE_APP_ID=your_app_id
+REACT_APP_VERCEL_API_URL=https://your-vercel-app.vercel.app/api
 ```
 
-Edit `.env` with your Firebase configuration. See [Firebase Setup Guide](./docs/FIREBASE_SETUP.md) for detailed instructions.
-
-5. **Configure Firebase Functions and APIs**
-
-See the comprehensive guides:
-- [API Setup Guide](./docs/API_SETUP.md) - Configure cricket, football, and multi-sport APIs
-- [Firebase Setup Guide](./docs/FIREBASE_SETUP.md) - Complete Firebase configuration
-
-## 🚀 Development
-
-### Start the development server with Firebase emulators
-
+4. **Start development server**
 ```bash
-# Terminal 1: Start Firebase emulators
-npm run emulators
-
-# Terminal 2: Start React development server
 npm start
 ```
 
-The app will be available at:
-- React App: http://localhost:3000
-- Firebase Emulator UI: http://localhost:4000
-
-### Seed sample data to emulators
-
-```bash
-npm run seed
-```
-
-## 📦 Build & Deployment
-
-### Build for production
-
-```bash
-npm run build
-```
-
-### Deploy to Firebase
-
-```bash
-# Deploy to staging
-npm run deploy:staging
-
-# Deploy to production
-npm run deploy:prod
-```
-
-### CI/CD with GitHub Actions
-
-The project includes GitHub Actions workflows for:
-- Pull Request checks (linting, tests, build)
-- Automatic deployment to Firebase on merge to main
-
-Set up GitHub Secrets:
-- `FIREBASE_SERVICE_ACCOUNT`: Firebase service account JSON
-- `FIREBASE_PROJECT_ID`: Your Firebase project ID
-
-## 🧪 Testing
-
-### Run all tests
-```bash
-npm test
-```
-
-### Run tests with coverage
-```bash
-npm test -- --coverage
-```
-
-### Run E2E tests
-```bash
-npm run test:e2e
-```
-
-### Run linting
-```bash
-npm run lint
-```
-
-## 📁 Project Structure
-
-```
-matcharena/
-├── src/                          # React application source
-│   ├── components/               # Reusable UI components
-│   │   ├── cricket/             # Cricket-specific components
-│   │   ├── football/            # Football-specific components
-│   │   ├── basketball/          # Basketball-specific components
-│   │   └── [shared components]   # Cross-sport components
-│   ├── pages/                   # Page components & routes
-│   ├── services/                # API and Firebase services
-│   │   ├── api/                # Sports API adapters
-│   │   │   ├── adapters/       # Sport-specific API adapters
-│   │   │   └── sports/         # Individual sport APIs
-│   │   └── firebase/           # Firebase client utilities
-│   ├── hooks/                  # Custom React hooks
-│   ├── contexts/               # React contexts (Auth, Theme, etc.)
-│   ├── utils/                  # Utility functions
-│   ├── config/                 # App configuration
-│   └── __tests__/              # Component tests
-├── functions/                   # Firebase Cloud Functions
-│   ├── src/                    # Functions source code
-│   │   ├── api/               # HTTP endpoints
-│   │   ├── services/          # Business logic services
-│   │   ├── mappers/           # Data transformation
-│   │   └── config/            # Functions configuration
-│   └── package.json           # Functions dependencies
-├── public/                     # Static assets
-│   └── api/                   # Static API mock data
-├── tests/                     # Test suites
-│   ├── unit/                 # Unit tests
-│   ├── integration/          # Integration tests
-│   ├── e2e/                 # End-to-end tests (Cypress)
-│   └── fixtures/            # Test data
-├── scripts/                  # Utility scripts
-├── docs/                    # Documentation
-│   ├── README.md           # Documentation index
-│   ├── API_SETUP.md        # API configuration guide
-│   ├── FIREBASE_SETUP.md   # Firebase setup guide
-│   ├── DEPLOYMENT.md       # Deployment instructions
-│   └── adr/               # Architecture Decision Records
-├── .github/                # GitHub Actions workflows
-│   └── workflows/         # CI/CD pipeline definitions
-└── [config files]         # Package.json, Firebase config, etc.
-```
-
-## 🔐 Security
-
-### Database Security Rules
-- Role-based access control (RBAC)
-- Input validation at database level
-- Rate limiting on write operations
-
-### Content Security
-- DOMPurify for user-generated content sanitization
-- CSP headers configured in Firebase Hosting
-- API keys stored in Cloud Functions config
-
-### Authentication
-- Firebase Auth with email verification
-- OAuth providers (Google)
-- Custom claims for role management
-
-## 🌐 API Integration
-
-### Adding a New Sport
-
-1. Create an adapter in `src/services/api/adapters/`
-2. Implement the `SportAdapter` interface
-3. Add sport to `SUPPORTED_SPORTS` in config
-4. Create Cloud Function for data polling
-5. Update database schema if needed
-
-### Supported Sports APIs
-- **Cricket**: CricAPI (https://cricapi.com)
-- **Football**: API-SPORTS (https://www.api-football.com)
-- **Other Sports**: API-SPORTS supports 20+ sports including Basketball, Tennis, Hockey, Rugby, etc.
-
-## 🤝 Contributing
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
-
-### Development Workflow
-1. Create a feature branch from `develop`
-2. Make your changes
-3. Write/update tests
-4. Submit a pull request to `develop`
-5. After review, it will be merged to `main` for deployment
-
-## 📝 Environment Variables
-
-### Client-side (.env)
-- `REACT_APP_ENV` - Environment (development/staging/production)
-- `REACT_APP_FIREBASE_*` - Firebase configuration
-- `REACT_APP_ANALYTICS_ENABLED` - Enable/disable analytics
-- `REACT_APP_SENTRY_DSN` - Error tracking (optional)
-
-### Server-side (Firebase Functions config)
-- `cric.api_key` - CricAPI key
-- `discord.webhook` - Discord webhook URL
-- `admin.allowed_emails` - Admin email addresses
-- `security.allowed_origins` - CORS allowed origins
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Firebase emulators not starting**
-```bash
-firebase emulators:start --import=./emulator-data --export-on-exit
-```
-
-**Build fails with memory error**
-```bash
-NODE_OPTIONS="--max-old-space-size=4096" npm run build
-```
-
-**Authentication not working locally**
-- Ensure emulators are running
-- Check Firebase project configuration
-- Verify environment variables
-
-## 📊 Performance
-
-- Lighthouse Score: 95+ (Performance, Accessibility, Best Practices, SEO)
-- First Contentful Paint: < 1.5s
-- Time to Interactive: < 3.5s
-- Code splitting and lazy loading
-- Image optimization and lazy loading
-- Service worker for offline support
-
-## 🚢 Production Checklist
-
-- [ ] Update environment variables for production
-- [ ] Configure Firebase Functions config for production
-- [ ] Set up monitoring and alerts
-- [ ] Configure backup strategy for database
-- [ ] Review and update security rules
-- [ ] Set up custom domain in Firebase Hosting
-- [ ] Configure CDN if needed
-- [ ] Set up error tracking (Sentry)
-- [ ] Configure rate limiting
-- [ ] Review CSP headers
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Firebase for backend infrastructure
-- CricAPI for cricket data
-- React and Tailwind CSS communities
-- All contributors and testers
-
-## 📞 Support
-
-For support, email support@matcharena.com or join our Discord server.
+The app will be available at http://localhost:3000.
 
 ---
 
-**Built with ❤️ by the MatchArena Team**
+## Deployment
+
+### Firebase Hosting (Frontend)
+
+```bash
+# Build the production bundle
+set CI=false && npm run build
+
+# Deploy to Firebase
+firebase deploy --only hosting
+```
+
+### Vercel (API Proxy)
+
+The `/api` directory contains Vercel serverless functions. Deploy with:
+
+```bash
+npx vercel --prod --yes
+```
+
+Ensure the following environment variables are set in your Vercel project:
+- `CRICAPI_KEY` - CricData.org API key
+- `APISPORTS_KEY` - API-Sports API key
+
+---
+
+## Project Structure
+
+```
+Track-Your-Sport/
+├── src/
+│   ├── components/          # Reusable UI components
+│   │   ├── MatchCard.jsx    # Unified match card for all sports
+│   │   ├── SportsDashboard  # Multi-sport dashboard with tabs
+│   │   ├── Navbar.jsx       # Navigation with sports dropdown
+│   │   ├── Footer.jsx       # Site footer with legal links
+│   │   └── ...
+│   ├── pages/               # Route-level page components
+│   │   ├── Home.jsx         # Landing page with hero + live matches
+│   │   ├── Explore.jsx      # Browse all sports
+│   │   ├── MatchList.jsx    # Sport-specific match listing
+│   │   ├── MatchDetail.jsx  # Individual match details
+│   │   ├── Privacy.jsx      # Privacy policy
+│   │   ├── Terms.jsx        # Terms of service
+│   │   ├── Cookies.jsx      # Cookie policy
+│   │   └── ...
+│   ├── services/
+│   │   ├── apiService.js    # Unified API client with caching
+│   │   └── firebase/        # Firebase client setup
+│   ├── config/
+│   │   └── routes.js        # Route definitions + sport config
+│   ├── contexts/            # Auth + Theme contexts
+│   └── hooks/               # Custom React hooks
+├── api/                     # Vercel serverless functions
+│   ├── cricket-live.js      # CricData live matches
+│   ├── football-live.js     # API-Football live fixtures
+│   ├── sports-proxy.js      # Generic proxy for all API-Sports
+│   └── health.js            # Health check endpoint
+├── functions/               # Firebase Cloud Functions
+├── public/                  # Static assets
+└── firebase.json            # Firebase hosting + functions config
+```
+
+---
+
+## API Usage and Optimization
+
+### Free Tier Limits
+- **CricData.org:** 100 requests/day (shared across all cricket endpoints)
+- **API-Sports:** 100 requests/day per sport (12 separate quotas)
+
+### Optimization Strategies
+- Client-side caching with configurable TTLs (5 min live, 20 min upcoming, 30 min recent)
+- Request deduplication prevents duplicate in-flight requests
+- Dashboard only fetches 3 featured sports on page load
+- Other sports lazy-load when user navigates to them
+- Match detail page uses zero extra API calls (data passed via router state)
+- Stale cache fallback on API errors
+
+---
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `REACT_APP_FIREBASE_API_KEY` | Firebase API key |
+| `REACT_APP_FIREBASE_AUTH_DOMAIN` | Firebase auth domain |
+| `REACT_APP_FIREBASE_DATABASE_URL` | Firebase RTDB URL |
+| `REACT_APP_FIREBASE_PROJECT_ID` | Firebase project ID |
+| `REACT_APP_FIREBASE_STORAGE_BUCKET` | Firebase storage bucket |
+| `REACT_APP_FIREBASE_MESSAGING_SENDER_ID` | Firebase messaging sender ID |
+| `REACT_APP_FIREBASE_APP_ID` | Firebase app ID |
+| `REACT_APP_VERCEL_API_URL` | Vercel API proxy base URL |
+| `REACT_APP_ENV` | Environment (development/production) |
+
+---
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+---
+
+## Acknowledgments
+
+- [Firebase](https://firebase.google.com/) for authentication, database, and hosting
+- [CricData.org](https://cricketdata.org/) for cricket match data
+- [API-Sports](https://api-sports.io/) for multi-sport data
+- [React](https://react.dev/) and [Tailwind CSS](https://tailwindcss.com/) communities
+
+---
+
+Built by the Track Your Sport Team

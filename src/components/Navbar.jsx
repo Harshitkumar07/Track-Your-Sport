@@ -38,7 +38,6 @@ const Navbar = () => {
               <span className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text text-transparent">
                 {APP_CONFIG.appName}
               </span>
-              <span className="text-xl">🏏</span>
             </Link>
           </div>
 

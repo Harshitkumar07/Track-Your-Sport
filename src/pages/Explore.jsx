@@ -21,7 +21,7 @@ const Explore = () => {
     <>
       <Helmet>
         <title>Explore Sports - {APP_CONFIG.appName}</title>
-        <meta name="description" content="Explore cricket, football, kabaddi and more sports with live scores and community discussions" />
+        <meta name="description" content="Explore cricket and football with live scores, match details and community discussions" />
       </Helmet>
 
       <div className="max-w-7xl mx-auto">

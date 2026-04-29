@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { auth } from '../lib/firebase';
+import { auth } from './firebase';
 import { User, LogOut, ChevronRight, Share2, Plus, Zap, Menu, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ArenaLayoutProps {
   children: React.ReactNode;

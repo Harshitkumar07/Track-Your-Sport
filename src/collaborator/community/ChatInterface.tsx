@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { firebaseService } from '../services/firebaseService';
 import { Community, Thread, Message } from '../types';
 import { Send, ArrowLeft, MoreVertical, ShieldCheck, Zap } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
-import { auth } from '../lib/firebase';
+import { motion, AnimatePresence } from 'framer-motion';
+import { auth } from './firebase';
 
 interface ChatInterfaceProps {
   community: Community;

@@ -4,8 +4,9 @@
  */
 
 import { useState, useEffect } from 'react';
-import Profile from './components/Profile';
-import OnboardingForm from './components/OnboardingForm';
+import './index.css';
+import Profile from './Profile';
+import OnboardingForm from './OnboardingForm';
 import { UserData } from './types';
 
 export default function App() {

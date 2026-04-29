@@ -1,8 +1,8 @@
 import React from 'react';
-import { auth } from '../lib/firebase';
+import { auth } from './firebase';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { Trophy, LogIn } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 export default function AuthOverlay() {
   const handleLogin = async () => {

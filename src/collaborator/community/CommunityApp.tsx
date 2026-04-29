@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import './index.css';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from './lib/firebase';
-import { firebaseService } from './services/firebaseService';
-import ArenaLayout from './components/ArenaLayout';
-import CommunitySidebar from './components/CommunitySidebar';
-import ThreadList from './components/ThreadList';
-import ChatInterface from './components/ChatInterface';
-import SuggestSector from './components/SuggestSector';
-import DugoutFeed from './components/DugoutFeed';
-import HotTopicsSidebar from './components/HotTopicsSidebar';
-import AuthOverlay from './components/AuthOverlay';
-import StandingsView from './components/StandingsView';
-import LiveScoresView from './components/LiveScoresView';
+import { auth } from './firebase';
+import { firebaseService } from './firebaseService';
+import ArenaLayout from './ArenaLayout';
+import CommunitySidebar from './CommunitySidebar';
+import ThreadList from './ThreadList';
+import ChatInterface from './ChatInterface';
+import SuggestSector from './SuggestSector';
+import DugoutFeed from './DugoutFeed';
+import HotTopicsSidebar from './HotTopicsSidebar';
+import AuthOverlay from './AuthOverlay';
+import StandingsView from './StandingsView';
+import LiveScoresView from './LiveScoresView';
 import { Community, Thread } from './types';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function App() {
   const [user, setUser] = useState<any>(null);

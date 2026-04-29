@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Send, CheckCircle2, ArrowLeft, Trophy, Zap, Globe, Users } from 'lucide-react';
 import { firebaseService } from '../services/firebaseService';
 

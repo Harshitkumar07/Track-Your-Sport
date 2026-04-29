@@ -18,7 +18,7 @@ import {
   arrayUnion,
   arrayRemove
 } from 'firebase/firestore';
-import { db, auth } from '../lib/firebase';
+import { db, auth } from './firebase';
 import { UserProfile, Community, Thread, Message, Post, PostComment } from '../types';
 
 enum OperationType {

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { firebaseService } from '../services/firebaseService';
 import { Community, Thread } from '../types';
 import { MessageSquare, Clock, User, Hash, Plus, Zap, Activity } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import DugoutFeed from './DugoutFeed';
 
 interface ThreadListProps {

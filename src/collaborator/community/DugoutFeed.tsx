@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, MessageSquare, Share2, Send, Zap, Globe, Image as ImageIcon, X, ArrowLeft, Check, Trash2 } from 'lucide-react';
 import { firebaseService } from '../services/firebaseService';
 import { Post, PostComment } from '../types';
-import { auth } from '../lib/firebase';
+import { auth } from './firebase';
 import { formatDistanceToNow } from 'date-fns';
 
 interface DugoutFeedProps {

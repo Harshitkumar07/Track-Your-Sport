@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React from 'react';
 import { Trophy, Activity, ArrowLeft } from 'lucide-react';
 

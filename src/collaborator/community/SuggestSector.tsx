@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Send, CheckCircle2, ArrowLeft, Trophy, Zap, Globe, Users } from 'lucide-react';

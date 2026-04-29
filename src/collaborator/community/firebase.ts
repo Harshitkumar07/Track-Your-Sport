@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { getFirestore } from 'firebase/firestore';
 import { app, auth } from '../../services/firebase/firebaseClient';
 

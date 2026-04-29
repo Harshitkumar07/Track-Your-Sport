@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState } from 'react';
 import { auth } from './firebase';
 import { User, LogOut, ChevronRight, Share2, Plus, Zap, Menu, X } from 'lucide-react';

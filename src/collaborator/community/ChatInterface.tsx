@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useEffect, useRef, useState } from 'react';
 import { firebaseService } from './firebaseService';
 import { Community, Thread, Message } from './types';

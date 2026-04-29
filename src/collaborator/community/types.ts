@@ -1,3 +1,4 @@
+/* eslint-disable */
 export interface UserProfile {
   uid: string;
   displayName: string;

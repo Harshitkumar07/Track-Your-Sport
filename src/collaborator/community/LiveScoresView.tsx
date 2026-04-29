@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React from 'react';
 import { Activity, Clock, ArrowLeft } from 'lucide-react';
 

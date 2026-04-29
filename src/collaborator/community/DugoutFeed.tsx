@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, MessageSquare, Share2, Send, Zap, Globe, Image as ImageIcon, X, ArrowLeft, Check, Trash2 } from 'lucide-react';

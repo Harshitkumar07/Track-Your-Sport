@@ -34,7 +34,12 @@ module.exports = {
           light: '#fdba74',
           DEFAULT: '#fb923c',
           dark: '#ea580c'
-        }
+        },
+        volt: '#4F46E5',
+        midnight: '#0F172A',
+        ink: '#1E293B',
+        accent: '#06B6D4',
+        hot: '#F43F5E'
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],

@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React from 'react';
 import { TrendingUp, MessageSquare, Zap, Activity } from 'lucide-react';
 

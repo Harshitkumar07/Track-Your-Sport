@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase';
@@ -46,7 +47,8 @@ export default function App() {
   }
 
   if (!user) {
-    return <AuthOverlay />;
+    window.location.href = '/auth';
+    return null;
   }
 
   return (

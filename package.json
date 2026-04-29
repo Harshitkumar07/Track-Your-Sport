@@ -72,6 +72,14 @@
     "extends": [
       "react-app",
       "react-app/jest"
+    ],
+    "overrides": [
+      {
+        "files": ["**/*.ts", "**/*.tsx"],
+        "rules": {
+          "no-undef": "off"
+        }
+      }
     ]
   },
   "browserslist": {

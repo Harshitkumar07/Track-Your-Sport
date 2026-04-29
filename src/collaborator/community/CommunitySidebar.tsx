@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { firebaseService } from '../services/firebaseService';
-import { Community } from '../types';
+import { firebaseService } from './firebaseService';
+import { Community } from './types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, Plus, X, Send, CheckCircle2, Zap, Flame } from 'lucide-react';
 

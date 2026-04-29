@@ -4,7 +4,7 @@ import { User, LogOut, ChevronRight, Share2, Plus, Zap, Menu, X } from 'lucide-r
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ArenaLayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   sidebar: React.ReactNode;
   rightBar?: React.ReactNode;
   isSidebarOpen: boolean;

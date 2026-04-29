@@ -4,7 +4,6 @@
  */
 
 import { useState, useEffect } from 'react';
-import './index.css';
 import Profile from './Profile';
 import OnboardingForm from './OnboardingForm';
 import { UserData } from './types';

@@ -19,7 +19,7 @@ import {
   arrayRemove
 } from 'firebase/firestore';
 import { db, auth } from './firebase';
-import { UserProfile, Community, Thread, Message, Post, PostComment } from '../types';
+import { UserProfile, Community, Thread, Message, Post, PostComment } from './types';
 
 enum OperationType {
   CREATE = 'create',

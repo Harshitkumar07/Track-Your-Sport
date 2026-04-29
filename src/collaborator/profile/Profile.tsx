@@ -7,7 +7,7 @@ import {
   Camera
 } from 'lucide-react';
 
-import { UserData } from '../types';
+import { UserData } from './types';
 
 interface ProfileProps {
   initialUser: UserData;

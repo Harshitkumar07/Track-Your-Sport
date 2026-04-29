@@ -25,12 +25,12 @@ A real-time multi-sport score tracking platform built with React, Firebase, and 
 - Zero extra API calls when navigating from match list (uses React Router state)
 - Fallback to cached data for direct URL access
 
-### Community and User Features
-- User authentication via Google OAuth and email/password (Firebase Auth)
-- Community forums with posts, comments, and voting
-- User profiles and preferences
-- Role-based access control (User, Moderator, Admin)
-- Dark/Light theme switching
+### Community & User Profiles (New!)
+- **Universal Community Dashboard**: Real-time sports discussion threads, dugout global feeds, and specific sports sector channels.
+- **Dynamic User Profiles**: Track your joined communities, update your sports banner and avatar, and monitor your recent activity.
+- **Framer Motion Animations**: Smooth page transitions and dynamic micro-interactions powered by Framer Motion.
+- **Firebase Firestore & Realtime Database integration**: Combines robust match tracking with fast real-time chat syncs.
+- Role-based access control (User, Moderator, Admin) and Dark/Light theme switching.
 
 ### Admin Panel
 - Content moderation dashboard
@@ -43,14 +43,14 @@ A real-time multi-sport score tracking platform built with React, Firebase, and 
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | React 18, React Router v6, Tailwind CSS |
+| Frontend | React 18, React Router v6, Tailwind CSS, Framer Motion |
 | State | React Context, React Query |
 | Auth | Firebase Authentication |
-| Database | Firebase Realtime Database |
+| Database | Firebase Realtime Database (Matches) & Firestore (Community) |
 | Hosting | Firebase Hosting (frontend), Vercel Serverless Functions (API proxy) |
 | Cricket API | CricData.org |
 | Sports APIs | API-Sports (12 sports) |
-| Build | Create React App, CI=false for production builds |
+| Build | Create React App with TypeScript JSX support |
 
 ---
 
@@ -67,9 +67,7 @@ Vercel Serverless Functions (API Proxy)
     +---> /api/cricket-recent     --> CricData.org
     +---> /api/cricket-series     --> CricData.org
     +---> /api/football-live      --> API-Football
-    +---> /api/football-upcoming  --> API-Football
     +---> /api/sports-proxy       --> API-Sports (all other sports)
-    +---> /api/health             --> Health check
 ```
 
 The Vercel proxy layer handles API key injection, CORS, and response normalization. The React client caches responses aggressively to minimize API usage.
@@ -81,7 +79,7 @@ The Vercel proxy layer handles API key injection, CORS, and response normalizati
 - Node.js 18+ LTS
 - npm 9+
 - Firebase CLI (`npm install -g firebase-tools`)
-- A Firebase project with Authentication and Realtime Database enabled
+- A Firebase project with Authentication, Realtime Database, and Firestore enabled
 - API keys for CricData.org and API-Sports
 
 ---
@@ -131,7 +129,7 @@ The app will be available at http://localhost:3000.
 
 ```bash
 # Build the production bundle
-set CI=false && npm run build
+$env:CI="false"; npm run build
 
 # Deploy to Firebase
 firebase deploy --only hosting
@@ -156,36 +154,19 @@ Ensure the following environment variables are set in your Vercel project:
 ```
 Track-Your-Sport/
 ├── src/
+│   ├── collaborator/        # Community & Profile Feature Modules (TypeScript)
+│   │   ├── community/       # Real-time Chat, Feeds, Sectors
+│   │   └── profile/         # User Avatars, Joined Communities
 │   ├── components/          # Reusable UI components
-│   │   ├── MatchCard.jsx    # Unified match card for all sports
-│   │   ├── SportsDashboard  # Multi-sport dashboard with tabs
-│   │   ├── Navbar.jsx       # Navigation with sports dropdown
-│   │   ├── Footer.jsx       # Site footer with legal links
-│   │   └── ...
 │   ├── pages/               # Route-level page components
-│   │   ├── Home.jsx         # Landing page with hero + live matches
-│   │   ├── Explore.jsx      # Browse all sports
-│   │   ├── MatchList.jsx    # Sport-specific match listing
-│   │   ├── MatchDetail.jsx  # Individual match details
-│   │   ├── Privacy.jsx      # Privacy policy
-│   │   ├── Terms.jsx        # Terms of service
-│   │   ├── Cookies.jsx      # Cookie policy
-│   │   └── ...
-│   ├── services/
-│   │   ├── apiService.js    # Unified API client with caching
-│   │   └── firebase/        # Firebase client setup
-│   ├── config/
-│   │   └── routes.js        # Route definitions + sport config
+│   ├── services/            # Unified API client & Firebase setup
+│   ├── config/              # Route definitions
 │   ├── contexts/            # Auth + Theme contexts
 │   └── hooks/               # Custom React hooks
 ├── api/                     # Vercel serverless functions
-│   ├── cricket-live.js      # CricData live matches
-│   ├── football-live.js     # API-Football live fixtures
-│   ├── sports-proxy.js      # Generic proxy for all API-Sports
-│   └── health.js            # Health check endpoint
 ├── functions/               # Firebase Cloud Functions
 ├── public/                  # Static assets
-└── firebase.json            # Firebase hosting + functions config
+└── firebase.json            # Firebase configuration
 ```
 
 ---
@@ -234,6 +215,7 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 - [CricData.org](https://cricketdata.org/) for cricket match data
 - [API-Sports](https://api-sports.io/) for multi-sport data
 - [React](https://react.dev/) and [Tailwind CSS](https://tailwindcss.com/) communities
+- [Framer Motion](https://www.framer.com/motion/) for animations
 
 ---
 

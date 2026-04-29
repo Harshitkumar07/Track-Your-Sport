@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Camera, MapPin, User, FileText, AtSign, ArrowRight, Image as ImageIcon } from 'lucide-react';
-import { UserData } from '../types';
+import { UserData } from './types';
 
 interface OnboardingFormProps {
   onComplete: (data: UserData) => void;

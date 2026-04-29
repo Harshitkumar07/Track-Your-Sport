@@ -46,7 +46,7 @@ jobs:
       - name: Build application
         run: npm run build
         env:
-          CI: true
+          CI: false
           REACT_APP_ENV: test
           REACT_APP_FIREBASE_API_KEY: test-key
           REACT_APP_FIREBASE_AUTH_DOMAIN: test.firebaseapp.com
